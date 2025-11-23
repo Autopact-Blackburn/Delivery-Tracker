@@ -1,0 +1,13 @@
+{
+  "deliveries": [],
+  "statusSteps": [
+    "Sold",
+    "Pending",
+    "In Transit",
+    "At Dealership",
+    "PD Started",
+    "Ready for Delivery",
+    "Delivered"
+  ],
+  "buffers": {}
+}
