@@ -1,0 +1,2726 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>TRAX Delivery Hub – Dealer Portal</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    /************************************
+     GLOBAL THEME VARIABLES
+    ************************************/
+    :root {
+      --bg: #050713;
+      --bg-elevated: #0b1020;
+      --bg-soft: #151b2f;
+      --accent: #22c55e;
+      --accent-soft: rgba(34, 197, 94, 0.18);
+      --accent-strong: #16a34a;
+      --accent-alt: #38bdf8;
+      --text-main: #f9fafb;
+      --text-muted: #9ca3af;
+      --border-subtle: #1f2937;
+      --danger: #f97373;
+      --shadow-soft: 0 18px 40px rgba(0, 0, 0, 0.6);
+      --radius-lg: 16px;
+      --radius-xl: 22px;
+      --radius-pill: 999px;
+      --slot-height: 34px;
+    }
+
+    body.light-theme {
+      --bg: #f3f4f6;
+      --bg-elevated: #ffffff;
+      --bg-soft: #e5e7eb;
+      --accent: #16a34a;
+      --accent-soft: rgba(22,163,74,0.18);
+      --accent-strong: #166534;
+      --accent-alt: #0284c7;
+      --text-main: #020617;
+      --text-muted: #6b7280;
+      --border-subtle: #cbd5f5;
+      --danger: #ef4444;
+      --shadow-soft: 0 8px 20px rgba(15, 23, 42, 0.15);
+    }
+
+    /************************************
+     GLOBAL RESET + BODY
+    ************************************/
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background: radial-gradient(circle at top left, #1f2937 0, #020617 55%);
+      color: var(--text-main);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body.light-theme {
+      background: radial-gradient(circle at top left, #e5e7eb 0, #f9fafb 55%);
+    }
+
+    .app-shell {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 14px 12px 18px;
+    }
+
+    /************************************
+     HEADER
+    ************************************/
+    header {
+      background: var(--bg-elevated);
+      border-radius: var(--radius-xl);
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      padding: 10px 16px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      box-shadow: var(--shadow-soft);
+      gap: 12px;
+    }
+
+    body.light-theme header {
+      background: #ffffff;
+      border-color: #cbd5f5;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand-mark {
+      width: 32px;
+      height: 32px;
+      border-radius: 10px;
+      background: radial-gradient(circle at 30% 20%, #38bdf8, #0ea5e9 40%, #020617 80%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 10px 30px rgba(56, 189, 248, 0.4);
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      font-size: 0.85rem;
+      color: #fff;
+    }
+
+    .brand-text h1 {
+      margin: 0;
+      font-size: 1.1rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+    }
+
+    .brand-text h1 span {
+      color: var(--accent);
+    }
+
+    .brand-text p {
+      margin: 2px 0 0;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .pill-group {
+      display: inline-flex;
+      padding: 2px;
+      border-radius: var(--radius-pill);
+      border: 1px solid rgba(148,163,184,0.4);
+      background: rgba(15,23,42,0.9);
+    }
+
+    body.light-theme .pill-group {
+      background: #ffffff;
+      border-color: #cbd5f5;
+    }
+
+    .pill-btn {
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      padding: 6px 12px;
+      border-radius: var(--radius-pill);
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .pill-btn.active {
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+      color: #022c22;
+      box-shadow: 0 8px 24px rgba(34,197,94,0.6);
+    }
+
+    .btn-ghost {
+      border-radius: var(--radius-pill);
+      border: 1px solid rgba(148,163,184,0.5);
+      background: rgba(15,23,42,0.9);
+      color: var(--text-main);
+      font-size: 0.8rem;
+      padding: 7px 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+    }
+
+    body.light-theme .btn-ghost {
+      background: #ffffff;
+      border-color: #cbd5f5;
+      color: #0f172a;
+    }
+
+    .btn-primary {
+      border-radius: var(--radius-pill);
+      border: none;
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+      color: #022c22;
+      font-size: 0.85rem;
+      padding: 8px 14px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      box-shadow: 0 12px 30px rgba(34,197,94,0.6);
+      font-weight: 500;
+    }
+
+    .btn-danger {
+      border-radius: var(--radius-pill);
+      border: 1px solid rgba(248, 113, 113, 0.8);
+      background: rgba(127, 29, 29, 0.6);
+      color: #fee2e2;
+      font-size: 0.77rem;
+      padding: 6px 10px;
+      cursor: pointer;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    /************************************
+     MAIN LAYOUT
+    ************************************/
+    .app-main {
+      margin-top: 10px;
+      display: grid;
+      grid-template-columns: minmax(0, 260px) minmax(0, 1.6fr) minmax(0, 0.9fr);
+      gap: 12px;
+      align-items: flex-start;
+    }
+
+    @media (max-width: 1080px) {
+      .app-main {
+        grid-template-columns: minmax(0, 260px) minmax(0, 1fr);
+        grid-template-rows: auto auto;
+      }
+    }
+
+    @media (max-width: 820px) {
+      .app-main {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    /************************************
+     SIDEBAR
+    ************************************/
+    .sidebar {
+      background: rgba(11, 16, 32, 0.98);
+      border-radius: var(--radius-xl);
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      padding: 10px 12px 12px;
+      box-shadow: var(--shadow-soft);
+    }
+
+    body.light-theme .sidebar {
+      background: #ffffff;
+      border-color: #cbd5f5;
+    }
+
+    .sidebar h2 {
+      margin: 0 0 8px;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.09em;
+      color: var(--text-muted);
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .stat-card {
+      background: radial-gradient(circle at top left, #1f2937, #020617);
+      border-radius: 14px;
+      padding: 7px 8px;
+      border: 1px solid rgba(148, 163, 184, 0.4);
+      font-size: 0.78rem;
+      cursor: pointer;
+      transition: box-shadow 0.12s ease, transform 0.12s ease, border-color 0.12s ease;
+    }
+
+    body.light-theme .stat-card {
+      background: #f9fafb;
+      border-color: #d1d5db;
+    }
+
+    .stat-card:hover {
+      box-shadow: 0 10px 26px rgba(15, 23, 42, 0.6);
+      transform: translateY(-1px);
+    }
+
+    .stat-label {
+      color: var(--text-muted);
+      margin-bottom: 3px;
+    }
+
+    .stat-value {
+      font-size: 0.95rem;
+      font-weight: 600;
+    }
+
+    .stat-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.7rem;
+      margin-top: 3px;
+      color: var(--accent-alt);
+    }
+
+    .status-tiles {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 4px;
+    }
+
+    .status-tile {
+      flex: 1 1 48%;
+      min-width: 110px;
+      padding: 6px 8px;
+      border-radius: 10px;
+      border: 1px solid rgba(148, 163, 184, 0.5);
+      background: rgba(15, 23, 42, 0.9);
+      font-size: 0.7rem;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .status-tile:hover {
+      border-color: #38bdf8;
+    }
+
+    .status-tile.active {
+      border-color: #22c55e;
+      box-shadow: 0 0 0 1px rgba(34, 197, 94, 0.6);
+    }
+
+    body.light-theme .status-tile {
+      background: #ffffff;
+      border-color: #d1d5db;
+    }
+
+    .status-tile-label {
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .status-tile-count {
+      font-weight: 600;
+    }
+
+    .status-tile-sub {
+      font-size: 0.65rem;
+      color: var(--accent-alt);
+    }
+
+    .filters {
+      margin-top: 10px;
+      border-top: 1px solid rgba(31, 41, 55, 0.8);
+      padding-top: 8px;
+    }
+
+    body.light-theme .filters {
+      border-top-color: #e5e7eb;
+    }
+
+    .filter-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 6px;
+    }
+
+    .filter-pill {
+      border-radius: var(--radius-pill);
+      border: 1px solid rgba(148, 163, 184, 0.5);
+      background: rgba(15, 23, 42, 0.9);
+      padding: 4px 8px;
+      font-size: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    body.light-theme .filter-pill {
+      background: #ffffff;
+      border-color: #cbd5f5;
+    }
+
+    .filter-pill label {
+      color: var(--text-muted);
+      font-size: 0.72rem;
+      white-space: nowrap;
+    }
+
+    .filter-pill select,
+    .filter-pill input {
+      border: none;
+      outline: none;
+      background: transparent;
+      font-size: 0.75rem;
+      min-width: 0;
+      color: var(--text-main);
+    }
+
+    body.light-theme .filter-pill select,
+    body.light-theme .filter-pill input {
+      color: #0f172a;
+    }
+
+    #filterStatus { min-width: 160px; }
+    #filterDept { min-width: 90px; }
+    #filterSalesperson { min-width: 130px; }
+
+    .filter-pill-wide {
+      flex: 1 1 100%;
+    }
+
+    .sidebar-reports {
+      margin-top: 10px;
+      border-top: 1px solid rgba(31,41,55,0.8);
+      padding-top: 8px;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+
+    body.light-theme .sidebar-reports {
+      border-top-color: #e5e7eb;
+    }
+
+    /************************************
+     CALENDAR PANEL
+    ************************************/
+    .calendar-shell {
+      background: rgba(11, 16, 32, 0.99);
+      border-radius: var(--radius-xl);
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      padding: 10px 10px 12px;
+      box-shadow: var(--shadow-soft);
+      min-height: 420px;
+    }
+
+    body.light-theme .calendar-shell {
+      background: #ffffff;
+      border-color: #e5e7eb;
+    }
+
+    .calendar-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 8px;
+    }
+
+    .calendar-toolbar-left {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .calendar-date-display {
+      padding: 4px 10px;
+      border-radius: var(--radius-pill);
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid rgba(148, 163, 184, 0.4);
+      font-size: 0.8rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    body.light-theme .calendar-date-display {
+      background: #ffffff;
+      border-color: #cbd5f5;
+    }
+
+    .calendar-date-display strong {
+      font-weight: 600;
+    }
+
+    .calendar-container {
+      margin-top: 4px;
+      border-radius: 14px;
+      overflow: hidden;
+      border: 1px solid rgba(31, 41, 55, 0.9);
+      background: var(--bg-soft);
+    }
+
+    body.light-theme .calendar-container {
+      border-color: #e5e7eb;
+    }
+
+    .month-grid {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      border-top: 1px solid var(--border-subtle);
+      border-left: 1px solid var(--border-subtle);
+    }
+
+    .month-header {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      background: radial-gradient(circle at top left, #111827, #020617);
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    body.light-theme .month-header {
+      background: #e5e7eb;
+    }
+
+    .month-header-cell {
+      padding: 6px 8px;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      text-align: center;
+    }
+
+    .month-cell {
+      border-right: 1px solid var(--border-subtle);
+      border-bottom: 1px solid var(--border-subtle);
+      min-height: 80px;
+      padding: 4px 4px 6px;
+      font-size: 0.75rem;
+      position: relative;
+      cursor: pointer;
+      background: rgba(15, 23, 42, 0.96);
+    }
+
+    body.light-theme .month-cell {
+      background: #f9fafb;
+    }
+
+    .month-cell.other-month {
+      background: rgba(15, 23, 42, 0.8);
+      color: #6b7280;
+    }
+
+    body.light-theme .month-cell.other-month {
+      background: #e5e7eb;
+    }
+
+    .month-cell-today {
+      box-shadow: inset 0 0 0 1px rgba(56, 189, 248, 0.6);
+    }
+
+    .month-cell-date {
+      font-size: 0.75rem;
+      margin-bottom: 2px;
+      color: var(--text-muted);
+    }
+
+    .month-cell-date span {
+      background: rgba(15, 23, 42, 0.9);
+      padding: 1px 6px;
+      border-radius: var(--radius-pill);
+      border: 1px solid rgba(148, 163, 184, 0.4);
+    }
+
+    body.light-theme .month-cell-date span {
+      background: #ffffff;
+      border-color: #d1d5db;
+    }
+
+    .month-cell .mini-badge {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      font-size: 0.65rem;
+      padding: 1px 5px;
+      border-radius: var(--radius-pill);
+      background: rgba(34, 197, 94, 0.12);
+      color: var(--accent);
+    }
+
+    .month-deliveries {
+      margin-top: 2px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .month-pill {
+      font-size: 0.7rem;
+      padding: 2px 6px;
+      border-radius: 10px;
+      background: rgba(15, 23, 42, 0.95);
+      border: 1px solid rgba(148, 163, 184, 0.5);
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+    }
+
+    body.light-theme .month-pill {
+      background: #ffffff;
+      border-color: #d1d5db;
+    }
+
+    .time-grid {
+      display: grid;
+      grid-template-columns: 60px repeat(7, minmax(0, 1fr));
+      border-top: 1px solid var(--border-subtle);
+      font-size: 0.74rem;
+      background: rgba(15, 23, 42, 0.96);
+    }
+
+    body.light-theme .time-grid {
+      background: #f9fafb;
+    }
+
+    .time-grid.day-view {
+      grid-template-columns: 60px minmax(0, 1fr);
+    }
+
+    .time-grid-header {
+      display: contents;
+    }
+
+    .time-grid-header-cell {
+      padding: 6px 6px;
+      text-align: center;
+      border-right: 1px solid var(--border-subtle);
+      background: radial-gradient(circle at top left, #111827, #020617);
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    body.light-theme .time-grid-header-cell {
+      background: #e5e7eb;
+      color: #4b5563;
+    }
+
+    .time-grid-header-cell.time-label {
+      text-align: left;
+    }
+
+    .time-row {
+      display: contents;
+    }
+
+    .time-label-cell {
+      border-right: 1px solid var(--border-subtle);
+      border-bottom: 1px solid var(--border-subtle);
+      padding: 2px 6px;
+      color: var(--text-muted);
+      background: rgba(15, 23, 42, 0.98);
+    }
+
+    body.light-theme .time-label-cell {
+      background: #e5e7eb;
+    }
+
+    .time-slot-cell {
+      border-right: 1px solid var(--border-subtle);
+      border-bottom: 1px solid rgba(31, 41, 55, 0.9);
+      min-height: var(--slot-height);
+      position: relative;
+      padding: 2px 2px 0;
+      background: rgba(15, 23, 42, 0.96);
+      cursor: pointer;
+    }
+
+    body.light-theme .time-slot-cell {
+      border-bottom-color: #d1d5db;
+      background: #f9fafb;
+    }
+
+    .time-slot-inner {
+      min-height: calc(var(--slot-height) - 4px);
+    }
+
+    .delivery-card {
+      background: linear-gradient(135deg, #111827, #020617);
+      border-radius: 8px;
+      border: 1px solid rgba(148, 163, 184, 0.7);
+      padding: 3px 6px;
+      margin-bottom: 2px;
+      font-size: 0.72rem;
+      cursor: pointer;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    body.light-theme .delivery-card {
+      background: linear-gradient(135deg, #ffffff, #e5e7eb);
+      border-color: #cbd5f5;
+      box-shadow: 0 6px 16px rgba(15, 23, 42, 0.15);
+    }
+
+    .delivery-card.payment-finance {
+      border-color: #f472b6;
+      box-shadow: 0 0 0 1px rgba(236, 72, 153, 0.6);
+    }
+
+    .delivery-card.payment-cash {
+      border-color: #facc15;
+      box-shadow: 0 0 0 1px rgba(250, 204, 21, 0.6);
+    }
+
+    .delivery-card.confirmed {
+      border-color: #22c55e;
+      box-shadow: 0 0 0 1px rgba(34, 197, 94, 0.8), 0 10px 30px rgba(34, 197, 94, 0.6);
+    }
+
+    .delivery-main {
+      display: flex;
+      justify-content: space-between;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .delivery-title {
+      font-weight: 600;
+      font-size: 0.75rem;
+    }
+
+    .delivery-meta {
+      color: var(--text-muted);
+      font-size: 0.7rem;
+    }
+
+    .status-chip {
+      font-size: 0.65rem;
+      padding: 2px 6px;
+      border-radius: 999px;
+      background: rgba(56, 189, 248, 0.12);
+      color: #bae6fd;
+      white-space: nowrap;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .delivery-span-filler {
+      background: rgba(255, 255, 255, 0.06);
+      border-radius: 4px;
+      height: calc(var(--slot-height) - 4px);
+      margin-bottom: 2px;
+    }
+
+    body.light-theme .delivery-span-filler {
+      background: rgba(15, 23, 42, 0.05);
+    }
+
+    .empty-state {
+      padding: 24px 16px;
+      text-align: center;
+      font-size: 0.86rem;
+      color: var(--text-muted);
+    }
+
+    .empty-state strong {
+      color: #e5e7eb;
+    }
+
+    body.light-theme .empty-state strong {
+      color: #111827;
+    }
+
+    /************************************
+     DETAIL PANEL
+    ************************************/
+    .detail-panel {
+      background: radial-gradient(circle at top, #111827, #020617);
+      border-radius: var(--radius-xl);
+      border: 1px solid rgba(148, 163, 184, 0.55);
+      box-shadow: var(--shadow-soft);
+      padding: 10px 14px;
+      max-height: 520px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    body.light-theme .detail-panel {
+      background: #ffffff;
+      border-color: #cbd5f5;
+    }
+
+    .detail-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .detail-title {
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+
+    .detail-subtitle {
+      font-size: 0.76rem;
+      color: var(--text-muted);
+    }
+
+    .detail-close {
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 1.2rem;
+      cursor: pointer;
+    }
+
+    .detail-body {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      overflow-y: auto;
+      padding-right: 2px;
+      flex: 1 1 auto;
+    }
+
+    .detail-section {
+      margin-bottom: 10px;
+    }
+
+    .detail-section h3 {
+      margin: 0 0 4px;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-muted);
+    }
+
+    .detail-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4px 8px;
+      font-size: 0.78rem;
+    }
+
+    .detail-label {
+      color: var(--text-muted);
+    }
+
+    .detail-value {
+      color: #e5e7eb;
+      font-weight: 500;
+    }
+
+    body.light-theme .detail-value {
+      color: #111827;
+    }
+
+    .detail-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 6px;
+    }
+
+    /************************************
+     MODALS
+    ************************************/
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.82);
+      backdrop-filter: blur(10px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 45;
+    }
+
+    .modal-backdrop.open {
+      display: flex;
+    }
+
+    .modal {
+      width: min(520px, 100% - 20px);
+      max-height: 90vh;
+      background: radial-gradient(circle at top, #111827, #020617);
+      border-radius: 18px;
+      border: 1px solid rgba(148, 163, 184, 0.6);
+      box-shadow: 0 24px 55px rgba(0, 0, 0, 0.85);
+      padding: 10px 14px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    body.light-theme .modal {
+      background: #ffffff;
+      border-color: #cbd5f5;
+      box-shadow: 0 20px 45px rgba(15, 23, 42, 0.18);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .modal-header h2 {
+      margin: 0;
+      font-size: 0.9rem;
+    }
+
+    .modal-body {
+      overflow-y: auto;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      padding-right: 2px;
+    }
+
+    .modal-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      margin-top: 6px;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px 10px;
+    }
+
+    .form-row-full {
+      grid-column: 1 / -1;
+    }
+
+    @media (max-width: 540px) {
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .field label {
+      display: block;
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      margin-bottom: 2px;
+    }
+
+    .field input,
+    .field select,
+    .field textarea {
+      width: 100%;
+      border-radius: 8px;
+      border: 1px solid rgba(148, 163, 184, 0.6);
+      background: rgba(15, 23, 42, 0.9);
+      color: var(--text-main);
+      padding: 5px 7px;
+      font-size: 0.8rem;
+      outline: none;
+    }
+
+    body.light-theme .field input,
+    body.light-theme .field select,
+    body.light-theme .field textarea {
+      background: #ffffff;
+      border-color: #cbd5f5;
+      color: #0f172a;
+    }
+
+    .status-list-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 8px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 8px;
+      margin-bottom: 6px;
+      font-size: 0.8rem;
+    }
+
+    body.light-theme .status-list-item {
+      background: #f3f4f6;
+    }
+
+    .status-name {
+      flex: 1;
+    }
+
+    .status-buffer {
+      width: 60px;
+    }
+
+    .status-controls button {
+      margin-left: 4px;
+      padding: 4px 8px;
+      font-size: 0.7rem;
+      cursor: pointer;
+    }
+
+    .status-controls .var-btn {
+      border-radius: 6px;
+      border: 1px solid #334155;
+      background: #0f172a;
+      color: #e5e7eb;
+    }
+
+    body.light-theme .status-controls .var-btn {
+      background: #e5e7eb;
+      border-color: #cbd5f5;
+      color: #0f172a;
+    }
+
+    .status-controls .var-btn:hover {
+      opacity: 0.9;
+    }
+
+    .status-journey-step {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 6px;
+      font-size: 0.8rem;
+    }
+
+    .status-dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 999px;
+      border: 2px solid rgba(148, 163, 184, 0.7);
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    .status-dot::after {
+      content: "";
+      position: absolute;
+      inset: 2px;
+      border-radius: inherit;
+      background: transparent;
+    }
+
+    .status-journey-step.complete .status-dot {
+      border-color: var(--accent-alt);
+    }
+
+    .status-journey-step.complete .status-dot::after {
+      background: var(--accent-alt);
+      box-shadow: 0 0 10px rgba(56, 189, 248, 0.8);
+    }
+
+    .status-journey-step.current .status-dot {
+      border-color: var(--accent);
+    }
+
+    .status-journey-step.current .status-dot::after {
+      background: var(--accent);
+      box-shadow: 0 0 10px rgba(34, 197, 94, 0.8);
+    }
+
+    .status-journey-label strong {
+      display: block;
+      color: #e5e7eb;
+    }
+
+    body.light-theme .status-journey-label strong {
+      color: #111827;
+    }
+
+    .status-journey-label span {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <header>
+      <div class="brand">
+        <div class="brand-mark">TX</div>
+        <div class="brand-text">
+          <h1>TRA<span>X</span> Delivery Hub</h1>
+          <p>Dealer delivery calendar</p>
+        </div>
+      </div>
+
+      <div class="topbar">
+        <button class="btn-ghost" id="todayBtn">Today</button>
+
+        <div class="pill-group" id="viewSwitcher">
+          <button class="pill-btn active" data-view="month">Month</button>
+          <button class="pill-btn" data-view="week">Week</button>
+          <button class="pill-btn" data-view="day">Day</button>
+        </div>
+
+        <button class="btn-primary" id="addDeliveryBtn">＋ Delivery</button>
+        <button class="btn-ghost" id="themeToggleBtn">🌙 / ☀️</button>
+        <button class="btn-ghost" id="settingsBtn">⚙</button>
+      </div>
+    </header>
+
+    <div class="app-main">
+      <!-- Sidebar -->
+      <aside class="sidebar">
+        <h2>Overview</h2>
+        <div class="stats-grid">
+          <article class="stat-card" id="statTotalCard">
+            <div class="stat-label">Total in calendar</div>
+            <div class="stat-value" id="statTotal">0</div>
+            <div class="stat-pill">
+              <span>📦</span><span id="statPendingText">0 pending</span>
+            </div>
+          </article>
+
+          <article class="stat-card" id="statStaleCard">
+            <div class="stat-label">No update &gt; 7 days</div>
+            <div class="stat-value" id="statStale">0</div>
+            <div class="stat-pill">
+              <span>⚠️</span><span>Needs attention</span>
+            </div>
+          </article>
+
+          <article class="stat-card" id="statThisMonthCard">
+            <div class="stat-label">This month</div>
+            <div class="stat-value" id="statThisMonth">0</div>
+            <div class="stat-pill">
+              <span>📆</span><span id="statThisMonthDelivered">0 delivered</span>
+            </div>
+          </article>
+
+          <article class="stat-card" id="statNextMonthCard">
+            <div class="stat-label">Next month</div>
+            <div class="stat-value" id="statNextMonth">0</div>
+            <div class="stat-pill">
+              <span>⏳</span><span id="statNextMonthInTransit">0 in transit</span>
+            </div>
+          </article>
+        </div>
+
+        <!-- Status tiles -->
+        <div id="statusTiles" class="status-tiles"></div>
+
+        <!-- Filters -->
+        <div class="filters">
+          <h2>Filters</h2>
+          <div class="filter-row">
+            <div class="filter-pill">
+              <label for="filterDept">Dept</label>
+              <select id="filterDept">
+                <option value="">All</option>
+                <option value="Kia">Kia</option>
+                <option value="Nissan">Nissan</option>
+                <option value="GWM">GWM</option>
+                <option value="Used">Used</option>
+              </select>
+            </div>
+
+            <div class="filter-pill">
+              <label for="filterStatus">Status</label>
+              <select id="filterStatus">
+                <option value="">All</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="filter-row">
+            <div class="filter-pill">
+              <label for="filterSalesperson">Sales</label>
+              <select id="filterSalesperson">
+                <option value="">All</option>
+              </select>
+            </div>
+
+            <div class="filter-pill filter-pill-wide">
+              <label for="filterSearch">Search</label>
+              <input id="filterSearch" type="search" placeholder="Name, deal#, rego, stock…" />
+            </div>
+          </div>
+        </div>
+
+        <div class="sidebar-reports">
+          <div style="margin-bottom:6px;">Exports</div>
+          <button class="btn-ghost" id="exportAllBtn">Export all (CSV)</button>
+          <button class="btn-ghost" id="exportFilteredBtn">Export filtered (CSV)</button>
+        </div>
+      </aside>
+
+      <!-- Calendar -->
+      <section class="calendar-shell">
+        <div class="calendar-toolbar">
+          <div class="calendar-toolbar-left">
+            <div class="calendar-date-display">
+              <span id="dateLabelPrefix">Month</span>
+              <strong id="dateLabelMain"></strong>
+            </div>
+          </div>
+          <div class="calendar-toolbar-right">
+            <button class="btn-ghost" id="prevBtn">◀</button>
+            <button class="btn-ghost" id="nextBtn">▶</button>
+          </div>
+        </div>
+
+        <div class="calendar-container" id="calendarContainer">
+          <div class="empty-state">
+            <strong>Loading calendar…</strong>
+          </div>
+        </div>
+      </section>
+
+      <!-- Detail panel -->
+      <section>
+        <aside class="detail-panel" id="detailPanel">
+          <div class="detail-header">
+            <div>
+              <div class="detail-title" id="detailTitle">Select a delivery</div>
+              <div class="detail-subtitle" id="detailSubtitle">Click any booking in the calendar</div>
+            </div>
+            <button class="detail-close" id="detailCloseBtn" aria-label="Close">×</button>
+          </div>
+
+          <div class="detail-body" id="detailBody">
+            <div class="detail-section">
+              <h3>Customer</h3>
+              <div class="detail-grid">
+                <div class="detail-label">Name</div>
+                <div class="detail-value" id="detailCustomer"></div>
+
+                <div class="detail-label">Deal #</div>
+                <div class="detail-value" id="detailDeal"></div>
+
+                <div class="detail-label">Customer #</div>
+                <div class="detail-value" id="detailCustNo"></div>
+
+                <div class="detail-label">Contact</div>
+                <div class="detail-value" id="detailContact"></div>
+
+                <div class="detail-label">Suburb</div>
+                <div class="detail-value" id="detailSuburb"></div>
+
+                <div class="detail-label">Postcode</div>
+                <div class="detail-value" id="detailPostcode"></div>
+
+                <div class="detail-label">Salesperson</div>
+                <div class="detail-value" id="detailSalesperson"></div>
+
+                <div class="detail-label">Business Manager</div>
+                <div class="detail-value" id="detailBusinessManager"></div>
+              </div>
+            </div>
+
+            <div class="detail-section">
+              <h3>Vehicle</h3>
+              <div class="detail-grid">
+                <div class="detail-label">Make / Model</div>
+                <div class="detail-value" id="detailVehicle"></div>
+
+                <div class="detail-label">Description</div>
+                <div class="detail-value" id="detailDesc"></div>
+
+                <div class="detail-label">Colour</div>
+                <div class="detail-value" id="detailColour"></div>
+
+                <div class="detail-label">Rego</div>
+                <div class="detail-value" id="detailRego"></div>
+
+                <div class="detail-label">Stock #</div>
+                <div class="detail-value" id="detailStock"></div>
+
+                <div class="detail-label">VIN</div>
+                <div class="detail-value" id="detailVin"></div>
+              </div>
+            </div>
+
+            <div class="detail-section">
+              <h3>Delivery</h3>
+              <div class="detail-grid">
+                <div class="detail-label">Date / Time</div>
+                <div class="detail-value" id="detailDateTime"></div>
+
+                <div class="detail-label">Department</div>
+                <div class="detail-value" id="detailDept"></div>
+
+                <div class="detail-label">Payment</div>
+                <div class="detail-value" id="detailPayment"></div>
+
+                <div class="detail-label">Payment Status</div>
+                <div class="detail-value" id="detailPaymentStatus"></div>
+
+                <div class="detail-label">Finance Status</div>
+                <div class="detail-value" id="detailFinanceStatus"></div>
+
+                <div class="detail-label">Last Update</div>
+                <div class="detail-value" id="detailLastUpdate"></div>
+
+                <div class="detail-label">Current Status</div>
+                <div class="detail-value" id="detailCurrentStatus"></div>
+              </div>
+            </div>
+
+            <div class="detail-section">
+              <h3>Notification preview</h3>
+              <div id="templatePreview"
+                   style="white-space:pre-wrap; margin-top:4px; border:1px solid #1e293b; padding:8px; border-radius:6px; background:#0f172a; color:#e5e7eb;">
+                Select a delivery to preview the customer message.
+              </div>
+            </div>
+          </div>
+
+          <div class="detail-actions">
+            <button class="btn-ghost" id="openStatusJourneyBtn">Status journey</button>
+            <button class="btn-ghost" id="notifyBtn">Notify Customer</button>
+            <button class="btn-ghost" id="editFromDetailBtn">Edit details</button>
+            <button class="btn-danger hidden" id="finaliseDeleteBtn">Finalise &amp; Delete</button>
+          </div>
+        </aside>
+      </section>
+    </div>
+  </div>
+
+  <!-- Add / Edit delivery modal -->
+  <div class="modal-backdrop" id="modalBackdrop">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 id="modalTitle">Add Delivery</h2>
+        <button class="detail-close" id="modalCloseBtn" aria-label="Close">×</button>
+      </div>
+      <div class="modal-body">
+        <form id="deliveryForm">
+          <input type="hidden" id="fieldId" />
+          <div class="form-grid">
+            <div class="field form-row-full">
+              <label for="fieldCustomerName">Customer name</label>
+              <input id="fieldCustomerName" type="text" required />
+            </div>
+            <div class="field">
+              <label for="fieldDealNumber">Deal #</label>
+              <input id="fieldDealNumber" type="text" required />
+            </div>
+            <div class="field">
+              <label for="fieldCustomerNumber">Customer #</label>
+              <input id="fieldCustomerNumber" type="text" />
+            </div>
+
+            <div class="field">
+              <label for="fieldMake">Make</label>
+              <input id="fieldMake" type="text" />
+            </div>
+            <div class="field">
+              <label for="fieldModel">Model</label>
+              <input id="fieldModel" type="text" />
+            </div>
+            <div class="field form-row-full">
+              <label for="fieldDescription">Description</label>
+              <input id="fieldDescription" type="text" placeholder="e.g. GT-Line, Auto, Safety Pack" />
+            </div>
+
+            <div class="field">
+              <label for="fieldColour">Colour</label>
+              <input id="fieldColour" type="text" />
+            </div>
+            <div class="field">
+              <label for="fieldRego">Rego</label>
+              <input id="fieldRego" type="text" placeholder="TBA if unknown" />
+            </div>
+            <div class="field">
+              <label for="fieldStockNumber">Stock #</label>
+              <input id="fieldStockNumber" type="text" />
+            </div>
+            <div class="field">
+              <label for="fieldVin">VIN</label>
+              <input id="fieldVin" type="text" />
+            </div>
+
+            <div class="field">
+              <label for="fieldDept">Department</label>
+              <select id="fieldDept">
+                <option value="">Select…</option>
+                <option value="Kia">Kia</option>
+                <option value="Nissan">Nissan</option>
+                <option value="GWM">GWM</option>
+                <option value="Used">Used</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="fieldPaymentMethod">Payment method</label>
+              <select id="fieldPaymentMethod">
+                <option value="">Select…</option>
+                <option value="Finance">Finance</option>
+                <option value="Cash / EFT">Cash / EFT</option>
+                <option value="Bank Cheque">Bank Cheque</option>
+                <option value="Lease / Novated">Lease / Novated</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="fieldFinanceStatus">Finance Status</label>
+              <select id="fieldFinanceStatus">
+                <option value="">Pending</option>
+                <option value="Approved">Approved</option>
+                <option value="Settled">Settled</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="fieldPaymentStatus">Payment Status</label>
+              <select id="fieldPaymentStatus">
+                <option value="Pending">Pending</option>
+                <option value="Cleared">Cleared</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="fieldDealDate">Deal date</label>
+              <input id="fieldDealDate" type="date" />
+            </div>
+            <div class="field">
+              <label for="fieldDeliveryDate">Delivery date</label>
+              <input id="fieldDeliveryDate" type="date" required />
+            </div>
+            <div class="field">
+              <label for="fieldDeliveryTime">Delivery time</label>
+              <input id="fieldDeliveryTime" type="time" value="10:00" />
+            </div>
+            <div class="field">
+              <label for="fieldDuration">Duration (mins)</label>
+              <input id="fieldDuration" type="number" value="90" min="30" step="30" />
+            </div>
+
+            <div class="field">
+              <label for="fieldSalesperson">Salesperson</label>
+              <input id="fieldSalesperson" type="text" placeholder="Who sold the car?" />
+            </div>
+
+            <div class="field">
+              <label for="fieldBusinessManager">Business Manager</label>
+              <input id="fieldBusinessManager" type="text" placeholder="Finance Manager" />
+            </div>
+
+            <div class="field">
+              <label for="fieldSuburb">Suburb</label>
+              <input id="fieldSuburb" type="text" placeholder="Customer suburb" />
+            </div>
+
+            <div class="field">
+              <label for="fieldPostcode">Postcode</label>
+              <input id="fieldPostcode" type="text" placeholder="Postcode" />
+            </div>
+
+            <div class="field form-row-full">
+              <label for="fieldContact">Customer contact (email / phone)</label>
+              <input id="fieldContact" type="text" />
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <div id="modalFooterInfo">New delivery</div>
+        <div>
+          <button class="btn-danger hidden" id="deleteBtn" type="button">Delete</button>
+          <button class="btn-primary" id="saveBtn" type="button">Save</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Settings modal (statuses + buffers) -->
+  <div class="modal-backdrop" id="settingsBackdrop">
+    <div class="modal">
+      <div class="modal-header">
+        <h2>TRAX Settings</h2>
+        <button class="detail-close" id="settingsCloseBtn" aria-label="Close">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="field form-row-full">
+          <label>Status journey &amp; buffers</label>
+          <div id="statusListContainer"></div>
+        </div>
+
+        <div class="form-grid">
+          <div class="field">
+            <label for="newStatusInput">Add new status</label>
+            <input id="newStatusInput" type="text" placeholder="e.g. PD Started" />
+          </div>
+          <div class="field" style="display:flex; align-items:flex-end;">
+            <button class="btn-primary" type="button" id="addStatusBtn">Add Status</button>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <div>Statuses &amp; buffers are saved locally in this browser.</div>
+        <div>
+          <button class="btn-primary" type="button" id="saveSettingsBtn">Save &amp; Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Status Journey modal -->
+  <div class="modal-backdrop" id="statusModalBackdrop">
+    <div class="modal">
+      <div class="modal-header">
+        <h2>Status Journey</h2>
+        <button class="detail-close" id="statusModalCloseBtn" aria-label="Close">×</button>
+      </div>
+      <div class="modal-body">
+        <div id="statusJourneyContainer"></div>
+      </div>
+      <div class="modal-footer">
+        <div id="statusModalInfo"></div>
+        <div>
+          <button class="btn-ghost" id="prevStageBtn" type="button">◀ Previous</button>
+          <button class="btn-primary" id="nextStageBtn" type="button">Next ▶</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    /******************************************************************
+     TRAX CORE STATE
+    ******************************************************************/
+    const STORAGE_KEYS = {
+      deliveries: "TRAX_DELIVERIES_V4",
+      statusSteps: "TRAX_STATUS_STEPS_V4",
+      buffers: "TRAX_STATUS_BUFFERS_V4",
+      theme: "TRAX_THEME_V4",
+    };
+
+    let DELIVERIES = [];
+    let STATUS_STEPS = [];
+    let STATUS_BUFFERS = {};
+    let CURRENT_VIEW = "month";
+    let CURRENT_DATE = new Date();
+    let ACTIVE_STATUS_FILTER = "";
+    let SELECTED_DELIVERY_ID = null;
+
+    /******************************************************************
+     STORAGE
+    ******************************************************************/
+    function loadState() {
+      try {
+        const rawDel = localStorage.getItem(STORAGE_KEYS.deliveries);
+        DELIVERIES = rawDel ? JSON.parse(rawDel) : [];
+
+        const rawSteps = localStorage.getItem(STORAGE_KEYS.statusSteps);
+        STATUS_STEPS = rawSteps
+          ? JSON.parse(rawSteps)
+          : ["Sold", "Pending", "In Transit", "At Dealership", "PD Started", "Ready for Delivery", "Delivered"];
+
+        const rawBuffers = localStorage.getItem(STORAGE_KEYS.buffers);
+        STATUS_BUFFERS = rawBuffers ? JSON.parse(rawBuffers) : {};
+        STATUS_STEPS.forEach(s => {
+          if (typeof STATUS_BUFFERS[s] !== "number") STATUS_BUFFERS[s] = 0;
+        });
+      } catch (e) {
+        console.error("Load state error", e);
+      }
+    }
+
+    function saveState() {
+      try {
+        localStorage.setItem(STORAGE_KEYS.deliveries, JSON.stringify(DELIVERIES));
+        localStorage.setItem(STORAGE_KEYS.statusSteps, JSON.stringify(STATUS_STEPS));
+        localStorage.setItem(STORAGE_KEYS.buffers, JSON.stringify(STATUS_BUFFERS));
+      } catch (e) {
+        console.error("Save state error", e);
+      }
+    }
+
+    /******************************************************************
+     THEME
+    ******************************************************************/
+    function applyTheme() {
+      const theme = localStorage.getItem(STORAGE_KEYS.theme) || "dark";
+      if (theme === "light") document.body.classList.add("light-theme");
+      else document.body.classList.remove("light-theme");
+    }
+
+    function toggleTheme() {
+      const current = localStorage.getItem(STORAGE_KEYS.theme) || "dark";
+      const next = current === "light" ? "dark" : "light";
+      localStorage.setItem(STORAGE_KEYS.theme, next);
+      applyTheme();
+    }
+
+    /******************************************************************
+     DATE HELPERS
+    ******************************************************************/
+    function startOfWeek(date) {
+      const d = new Date(date);
+      const day = d.getDay();
+      d.setDate(d.getDate() - day);
+      return d;
+    }
+
+    function sameDay(a, b) {
+      return (
+        a.getFullYear() === b.getFullYear() &&
+        a.getMonth() === b.getMonth() &&
+        a.getDate() === b.getDate()
+      );
+    }
+
+    function formatDateYMD(d) {
+      return d.toISOString().split("T")[0];
+    }
+
+    /******************************************************************
+     FILTER ENGINE
+    ******************************************************************/
+    function getFilteredDeliveries() {
+      const dept = document.getElementById("filterDept")?.value || "";
+      const status = document.getElementById("filterStatus")?.value || "";
+      const salesperson = document.getElementById("filterSalesperson")?.value || "";
+      const search = (document.getElementById("filterSearch")?.value || "").toLowerCase();
+
+      return DELIVERIES.filter(d => {
+        if (dept && d.dept !== dept) return false;
+        if (status && d.status !== status) return false;
+        if (ACTIVE_STATUS_FILTER && d.status !== ACTIVE_STATUS_FILTER) return false;
+        if (salesperson && d.salesperson !== salesperson) return false;
+
+        if (search) {
+          const hay = [
+            d.customerName,
+            d.dealNumber,
+            d.rego,
+            d.stockNumber,
+            d.salesperson,
+            d.businessManager,
+          ]
+            .join(" ")
+            .toLowerCase();
+          if (!hay.includes(search)) return false;
+        }
+
+        return true;
+      });
+    }
+
+    function refreshSalespersonFilter() {
+      const sel = document.getElementById("filterSalesperson");
+      if (!sel) return;
+      const salesSet = new Set(DELIVERIES.map(d => d.salesperson).filter(Boolean));
+      sel.innerHTML = '<option value="">All</option>';
+      [...salesSet].sort().forEach(sp => {
+        const opt = document.createElement("option");
+        opt.value = sp;
+        opt.textContent = sp;
+        sel.appendChild(opt);
+      });
+    }
+
+    function refreshStatusFilterDropdown() {
+      const sel = document.getElementById("filterStatus");
+      if (!sel) return;
+      sel.innerHTML = '<option value="">All</option>';
+      STATUS_STEPS.forEach(s => {
+        const opt = document.createElement("option");
+        opt.value = s;
+        opt.textContent = s;
+        sel.appendChild(opt);
+      });
+    }
+
+    /******************************************************************
+     STATUS TILES
+    ******************************************************************/
+    function renderStatusTiles() {
+      const container = document.getElementById("statusTiles");
+      if (!container) return;
+      container.innerHTML = "";
+
+      STATUS_STEPS.forEach(status => {
+        const count = DELIVERIES.filter(d => d.status === status).length;
+        const div = document.createElement("div");
+        div.className = "status-tile";
+        if (ACTIVE_STATUS_FILTER === status) div.classList.add("active");
+        div.dataset.status = status;
+        div.innerHTML = `
+          <div class="status-tile-label">${status}</div>
+          <div class="status-tile-count">${count}</div>
+          <div class="status-tile-sub">in this stage</div>
+        `;
+        div.addEventListener("click", () => {
+          if (ACTIVE_STATUS_FILTER === status) {
+            ACTIVE_STATUS_FILTER = "";
+          } else {
+            ACTIVE_STATUS_FILTER = status;
+            const statusSelect = document.getElementById("filterStatus");
+            if (statusSelect) statusSelect.value = "";
+          }
+          renderAll();
+        });
+        container.appendChild(div);
+      });
+    }
+
+    /******************************************************************
+     OVERVIEW STATS
+    ******************************************************************/
+    function updateStats() {
+      const total = DELIVERIES.length;
+      const now = new Date();
+      const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+      const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+      const nextStart = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+      const nextEnd = new Date(now.getFullYear(), now.getMonth() + 2, 0);
+      const sevenDaysAgo = new Date();
+      sevenDaysAgo.setDate(now.getDate() - 7);
+
+      let thisMonth = 0;
+      let nextMonth = 0;
+      let delivered = 0;
+      let pending = 0;
+      let stale = 0;
+      let nextMonthInTransit = 0;
+
+      DELIVERIES.forEach(d => {
+        const dDate = new Date(d.deliveryDate);
+        if (dDate >= monthStart && dDate <= monthEnd) thisMonth++;
+        if (dDate >= nextStart && dDate <= nextEnd) nextMonth++;
+
+        if (d.status === STATUS_STEPS[STATUS_STEPS.length - 1]) {
+          delivered++;
+        } else {
+          pending++;
+        }
+
+        if (d.lastUpdated && new Date(d.lastUpdated) < sevenDaysAgo && d.status !== STATUS_STEPS[STATUS_STEPS.length - 1]) {
+          stale++;
+        }
+
+        if (d.status === "In Transit" && dDate >= nextStart && dDate <= nextEnd) {
+          nextMonthInTransit++;
+        }
+      });
+
+      document.getElementById("statTotal").textContent = total;
+      document.getElementById("statThisMonth").textContent = thisMonth;
+      document.getElementById("statNextMonth").textContent = nextMonth;
+      document.getElementById("statStale").textContent = stale;
+      document.getElementById("statPendingText").textContent = `${pending} pending`;
+      document.getElementById("statThisMonthDelivered").textContent = `${delivered} delivered`;
+      document.getElementById("statNextMonthInTransit").textContent = `${nextMonthInTransit} in transit`;
+    }
+  </script>
+  <script>
+    /******************************************************************
+     CALENDAR HEADER DATE LABEL
+    ******************************************************************/
+    function updateHeaderDate() {
+      const main = document.getElementById("dateLabelMain");
+      const prefix = document.getElementById("dateLabelPrefix");
+      if (!main || !prefix) return;
+
+      if (CURRENT_VIEW === "month") {
+        prefix.textContent = "Month";
+        main.textContent = CURRENT_DATE.toLocaleString("en-AU", {
+          month: "long",
+          year: "numeric",
+        });
+      } else if (CURRENT_VIEW === "week") {
+        prefix.textContent = "Week";
+        const start = startOfWeek(CURRENT_DATE);
+        const end = new Date(start);
+        end.setDate(start.getDate() + 6);
+        main.textContent = `${start.toLocaleDateString("en-AU", {
+          day: "numeric",
+          month: "short",
+        })} — ${end.toLocaleDateString("en-AU", {
+          day: "numeric",
+          month: "short",
+        })}`;
+      } else {
+        prefix.textContent = "Day";
+        main.textContent = CURRENT_DATE.toLocaleDateString("en-AU", {
+          weekday: "long",
+          day: "numeric",
+          month: "long",
+        });
+      }
+    }
+
+    /******************************************************************
+     CALENDAR MAIN RENDER
+    ******************************************************************/
+    function renderCalendar() {
+      const container = document.getElementById("calendarContainer");
+      if (!container) return;
+
+      container.innerHTML = "";
+
+      if (DELIVERIES.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <strong>No deliveries yet.</strong><br />
+            Click <strong>“＋ Delivery”</strong> to start building your TRAX calendar.
+          </div>
+        `;
+        updateHeaderDate();
+        return;
+      }
+
+      if (CURRENT_VIEW === "month") renderMonthView(container);
+      else if (CURRENT_VIEW === "week") renderWeekView(container);
+      else renderDayView(container);
+
+      updateHeaderDate();
+    }
+
+    /******************************************************************
+     MONTH VIEW
+    ******************************************************************/
+    function renderMonthView(container) {
+      const year = CURRENT_DATE.getFullYear();
+      const month = CURRENT_DATE.getMonth();
+      const first = new Date(year, month, 1);
+      const start = startOfWeek(first);
+
+      const monthHeader = document.createElement("div");
+      monthHeader.className = "month-header";
+      const weekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+      weekdays.forEach(d => {
+        const cell = document.createElement("div");
+        cell.className = "month-header-cell";
+        cell.textContent = d;
+        monthHeader.appendChild(cell);
+      });
+      container.appendChild(monthHeader);
+
+      const grid = document.createElement("div");
+      grid.className = "month-grid";
+
+      const filtered = getFilteredDeliveries();
+
+      for (let i = 0; i < 42; i++) {
+        const day = new Date(start);
+        day.setDate(start.getDate() + i);
+
+        const cell = document.createElement("div");
+        cell.className = "month-cell";
+        if (day.getMonth() !== month) cell.classList.add("other-month");
+        if (sameDay(day, new Date())) cell.classList.add("month-cell-today");
+
+        cell.addEventListener("click", () => {
+          openAddModal(formatDateYMD(day), "10:00");
+        });
+
+        const dateDiv = document.createElement("div");
+        dateDiv.className = "month-cell-date";
+        dateDiv.innerHTML = `<span>${day.getDate()}</span>`;
+        cell.appendChild(dateDiv);
+
+        const dayDels = filtered.filter(d => sameDay(new Date(d.deliveryDate), day));
+        if (dayDels.length > 0) {
+          const badge = document.createElement("div");
+          badge.className = "mini-badge";
+          badge.textContent = dayDels.length;
+          cell.appendChild(badge);
+
+          const list = document.createElement("div");
+          list.className = "month-deliveries";
+
+          dayDels.slice(0, 4).forEach(d => {
+            const pill = document.createElement("div");
+            pill.className = "month-pill";
+            pill.textContent = `${d.customerName} (${d.model || ""})`;
+            pill.addEventListener("click", (e) => {
+              e.stopPropagation();
+              openDetailPanel(d.id);
+            });
+            list.appendChild(pill);
+          });
+
+          if (dayDels.length > 4) {
+            const more = document.createElement("div");
+            more.className = "month-pill";
+            more.textContent = `+${dayDels.length - 4} more…`;
+            list.appendChild(more);
+          }
+
+          cell.appendChild(list);
+        }
+
+        grid.appendChild(cell);
+      }
+
+      container.appendChild(grid);
+    }
+
+    /******************************************************************
+     WEEK VIEW
+    ******************************************************************/
+    function renderWeekView(container) {
+      const start = startOfWeek(CURRENT_DATE);
+      const weekdays = [...Array(7)].map((_, i) => {
+        const d = new Date(start);
+        d.setDate(start.getDate() + i);
+        return d;
+      });
+
+      const hours = Array.from({ length: 10 }, (_, i) => 8 + i); // 8–17
+
+      const grid = document.createElement("div");
+      grid.className = "time-grid";
+
+      // Header row
+      const header = document.createElement("div");
+      header.className = "time-grid-header";
+
+      const tl = document.createElement("div");
+      tl.className = "time-grid-header-cell time-label";
+      header.appendChild(tl);
+
+      weekdays.forEach(d => {
+        const h = document.createElement("div");
+        h.className = "time-grid-header-cell";
+        h.textContent = d.toLocaleDateString("en-AU", { weekday: "short", day: "numeric" });
+        header.appendChild(h);
+      });
+
+      grid.appendChild(header);
+
+      const filtered = getFilteredDeliveries();
+
+      hours.forEach(hour => {
+        const row = document.createElement("div");
+        row.className = "time-row";
+
+        const tlc = document.createElement("div");
+        tlc.className = "time-label-cell";
+        tlc.textContent = `${hour}:00`;
+        row.appendChild(tlc);
+
+        weekdays.forEach(day => {
+          const cell = document.createElement("div");
+          cell.className = "time-slot-cell";
+
+          cell.addEventListener("click", (e) => {
+            if (e.target === cell) {
+              const dateStr = formatDateYMD(day);
+              const timeStr = `${String(hour).padStart(2, "0")}:00`;
+              openAddModal(dateStr, timeStr);
+            }
+          });
+
+          const delList = filtered.filter(d => {
+            const delDay = new Date(d.deliveryDate);
+            const delTime = new Date(`${d.deliveryDate}T${d.deliveryTime || "10:00"}`);
+            return sameDay(delDay, day) && delTime.getHours() === hour;
+          });
+
+          if (delList.length > 0) {
+            addDeliveriesToSlot(cell, delList);
+          }
+
+          row.appendChild(cell);
+        });
+
+        grid.appendChild(row);
+      });
+
+      container.appendChild(grid);
+    }
+
+    /******************************************************************
+     DAY VIEW
+    ******************************************************************/
+    function renderDayView(container) {
+      const hours = Array.from({ length: 10 }, (_, i) => 8 + i);
+      const grid = document.createElement("div");
+      grid.className = "time-grid day-view";
+
+      const header = document.createElement("div");
+      header.className = "time-grid-header";
+
+      const tl = document.createElement("div");
+      tl.className = "time-grid-header-cell time-label";
+      header.appendChild(tl);
+
+      const dayLabel = document.createElement("div");
+      dayLabel.className = "time-grid-header-cell";
+      dayLabel.textContent = CURRENT_DATE.toLocaleDateString("en-AU", { weekday: "short", day: "numeric" });
+      header.appendChild(dayLabel);
+
+      grid.appendChild(header);
+
+      const filtered = getFilteredDeliveries();
+
+      hours.forEach(hour => {
+        const row = document.createElement("div");
+        row.className = "time-row";
+
+        const tlc = document.createElement("div");
+        tlc.className = "time-label-cell";
+        tlc.textContent = `${hour}:00`;
+        row.appendChild(tlc);
+
+        const cell = document.createElement("div");
+        cell.className = "time-slot-cell";
+        cell.addEventListener("click", (e) => {
+          if (e.target === cell) {
+            const dateStr = formatDateYMD(CURRENT_DATE);
+            const timeStr = `${String(hour).padStart(2, "0")}:00`;
+            openAddModal(dateStr, timeStr);
+          }
+        });
+
+        const delList = filtered.filter(d => {
+          const delDay = new Date(d.deliveryDate);
+          const delTime = new Date(`${d.deliveryDate}T${d.deliveryTime || "10:00"}`);
+          return sameDay(delDay, CURRENT_DATE) && delTime.getHours() === hour;
+        });
+
+        if (delList.length > 0) {
+          addDeliveriesToSlot(cell, delList);
+        }
+
+        row.appendChild(cell);
+        grid.appendChild(row);
+      });
+
+      container.appendChild(grid);
+    }
+
+    /******************************************************************
+     DELIVERY CARD(S) INTO A SLOT
+    ******************************************************************/
+    function addDeliveriesToSlot(cell, deliveries) {
+      deliveries.forEach(d => {
+        const card = document.createElement("div");
+        card.className = "delivery-card";
+
+        if (d.paymentStatus === "Cleared") card.classList.add("confirmed");
+        if (d.paymentMethod === "Finance") card.classList.add("payment-finance");
+        if (d.paymentMethod === "Cash / EFT") card.classList.add("payment-cash");
+
+        const duration = Number(d.duration) || 30;
+        const blocks = Math.max(1, Math.round(duration / 30));
+
+        card.innerHTML = `
+          <div class="delivery-main">
+            <div class="delivery-title">${d.customerName}</div>
+            <div class="status-chip">${d.status}</div>
+          </div>
+          <div class="delivery-meta">${d.make || ""} ${d.model || ""}</div>
+          <div class="delivery-meta">Deal ${d.dealNumber || ""} • ${d.rego || "TBA"}</div>
+          <div class="delivery-meta">${d.salesperson || ""} • ${d.businessManager || ""}</div>
+        `;
+
+        card.addEventListener("click", (e) => {
+          e.stopPropagation();
+          openDetailPanel(d.id);
+        });
+
+        cell.appendChild(card);
+
+        for (let i = 1; i < blocks; i++) {
+          const filler = document.createElement("div");
+          filler.className = "delivery-span-filler";
+          cell.appendChild(filler);
+        }
+      });
+    }
+
+    /******************************************************************
+     HEADER & VIEW SWITCH NAVIGATION
+    ******************************************************************/
+    function setView(view) {
+      CURRENT_VIEW = view;
+      const buttons = document.querySelectorAll("#viewSwitcher .pill-btn");
+      buttons.forEach(btn => {
+        if (btn.dataset.view === view) btn.classList.add("active");
+        else btn.classList.remove("active");
+      });
+      renderAll();
+    }
+
+    function goPrev() {
+      if (CURRENT_VIEW === "month") {
+        CURRENT_DATE.setMonth(CURRENT_DATE.getMonth() - 1);
+      } else if (CURRENT_VIEW === "week") {
+        CURRENT_DATE.setDate(CURRENT_DATE.getDate() - 7);
+      } else {
+        CURRENT_DATE.setDate(CURRENT_DATE.getDate() - 1);
+      }
+      renderAll();
+    }
+
+    function goNext() {
+      if (CURRENT_VIEW === "month") {
+        CURRENT_DATE.setMonth(CURRENT_DATE.getMonth() + 1);
+      } else if (CURRENT_VIEW === "week") {
+        CURRENT_DATE.setDate(CURRENT_DATE.getDate() + 7);
+      } else {
+        CURRENT_DATE.setDate(CURRENT_DATE.getDate() + 1);
+      }
+      renderAll();
+    }
+
+    function goToday() {
+      CURRENT_DATE = new Date();
+      renderAll();
+    }
+
+    /******************************************************************
+     GLOBAL RENDER
+    ******************************************************************/
+    function renderAll() {
+      renderStatusTiles();
+      refreshSalespersonFilter();
+      refreshStatusFilterDropdown();
+      updateStats();
+      renderCalendar();
+      refreshDetailPanel(); // keep current selection up to date
+    }
+  </script>
+  <script>
+    /******************************************************************
+     ADD / EDIT MODAL
+    ******************************************************************/
+    function openAddModal(defaultDate, defaultTime) {
+      SELECTED_DELIVERY_ID = null;
+
+      const form = document.getElementById("deliveryForm");
+      if (form) form.reset();
+
+      document.getElementById("fieldId").value = "";
+      document.getElementById("modalTitle").textContent = "Add Delivery";
+      document.getElementById("modalFooterInfo").textContent = "New delivery";
+      document.getElementById("deleteBtn").classList.add("hidden");
+
+      if (defaultDate) document.getElementById("fieldDeliveryDate").value = defaultDate;
+      if (defaultTime) document.getElementById("fieldDeliveryTime").value = defaultTime;
+      document.getElementById("fieldDuration").value = 90;
+
+      document.getElementById("modalBackdrop").classList.add("open");
+    }
+
+    function openEditModal(id) {
+      const d = DELIVERIES.find(x => x.id === id);
+      if (!d) return;
+      SELECTED_DELIVERY_ID = id;
+
+      document.getElementById("modalTitle").textContent = "Edit Delivery";
+      document.getElementById("modalFooterInfo").textContent = `Editing ${d.customerName || d.dealNumber || ""}`;
+      document.getElementById("deleteBtn").classList.remove("hidden");
+
+      const setVal = (fid, val) => {
+        const el = document.getElementById(fid);
+        if (el) el.value = val ?? "";
+      };
+
+      setVal("fieldId", d.id);
+      setVal("fieldCustomerName", d.customerName);
+      setVal("fieldDealNumber", d.dealNumber);
+      setVal("fieldCustomerNumber", d.customerNumber);
+      setVal("fieldMake", d.make);
+      setVal("fieldModel", d.model);
+      setVal("fieldDescription", d.description);
+      setVal("fieldColour", d.colour);
+      setVal("fieldRego", d.rego);
+      setVal("fieldStockNumber", d.stockNumber);
+      setVal("fieldVin", d.vin);
+      setVal("fieldDealDate", d.dealDate);
+      setVal("fieldDeliveryDate", d.deliveryDate);
+      setVal("fieldDeliveryTime", d.deliveryTime || "10:00");
+      setVal("fieldDuration", d.duration || 90);
+      setVal("fieldSalesperson", d.salesperson);
+      setVal("fieldBusinessManager", d.businessManager);
+      setVal("fieldSuburb", d.suburb);
+      setVal("fieldPostcode", d.postcode);
+      setVal("fieldContact", d.contact);
+
+      const deptSel = document.getElementById("fieldDept");
+      if (deptSel) deptSel.value = d.dept || "";
+
+      const paySel = document.getElementById("fieldPaymentMethod");
+      if (paySel) paySel.value = d.paymentMethod || "";
+
+      const finSel = document.getElementById("fieldFinanceStatus");
+      if (finSel) finSel.value = d.financeStatus || "";
+
+      const payStatSel = document.getElementById("fieldPaymentStatus");
+      if (payStatSel) payStatSel.value = d.paymentStatus || "Pending";
+
+      document.getElementById("modalBackdrop").classList.add("open");
+    }
+
+    function closeModal() {
+      document.getElementById("modalBackdrop").classList.remove("open");
+    }
+
+    function handleSaveDelivery() {
+      const getVal = id => (document.getElementById(id)?.value || "").trim();
+      const idField = getVal("fieldId") || null;
+
+      const customerName = getVal("fieldCustomerName");
+      const dealNumber = getVal("fieldDealNumber");
+      const deliveryDate = getVal("fieldDeliveryDate");
+
+      if (!customerName || !dealNumber || !deliveryDate) {
+        alert("Customer name, Deal # and Delivery date are required.");
+        return;
+      }
+
+      const record = {
+        id: idField || `TRAX-${Date.now()}-${Math.floor(Math.random() * 1e5)}`,
+        customerName,
+        dealNumber,
+        customerNumber: getVal("fieldCustomerNumber"),
+        make: getVal("fieldMake"),
+        model: getVal("fieldModel"),
+        description: getVal("fieldDescription"),
+        colour: getVal("fieldColour"),
+        rego: getVal("fieldRego") || "TBA",
+        stockNumber: getVal("fieldStockNumber"),
+        vin: getVal("fieldVin"),
+        dept: document.getElementById("fieldDept")?.value || "",
+        paymentMethod: document.getElementById("fieldPaymentMethod")?.value || "",
+        financeStatus: document.getElementById("fieldFinanceStatus")?.value || "",
+        paymentStatus: document.getElementById("fieldPaymentStatus")?.value || "Pending",
+        dealDate: getVal("fieldDealDate"),
+        deliveryDate,
+        deliveryTime: document.getElementById("fieldDeliveryTime")?.value || "10:00",
+        duration: Number(document.getElementById("fieldDuration")?.value || 90),
+        salesperson: getVal("fieldSalesperson"),
+        businessManager: getVal("fieldBusinessManager"),
+        suburb: getVal("fieldSuburb"),
+        postcode: getVal("fieldPostcode"),
+        contact: getVal("fieldContact"),
+      };
+
+      const existingIndex = DELIVERIES.findIndex(x => x.id === record.id);
+      if (existingIndex >= 0) {
+        // Preserve status for edits
+        record.status = DELIVERIES[existingIndex].status;
+        record.statusIndex = DELIVERIES[existingIndex].statusIndex;
+        record.lastUpdated = new Date().toISOString();
+        record.lastNotified = DELIVERIES[existingIndex].lastNotified || null;
+        DELIVERIES[existingIndex] = record;
+      } else {
+        // New delivery starts at first stage
+        record.statusIndex = 0;
+        record.status = STATUS_STEPS[0];
+        record.lastUpdated = new Date().toISOString();
+        record.lastNotified = null;
+        DELIVERIES.push(record);
+      }
+
+      saveState();
+      closeModal();
+      SELECTED_DELIVERY_ID = record.id;
+      renderAll();
+    }
+
+    function handleDeleteDelivery() {
+      const id = document.getElementById("fieldId").value || SELECTED_DELIVERY_ID;
+      if (!id) return;
+      const d = DELIVERIES.find(x => x.id === id);
+      const label = d ? `${d.customerName || ""} (${d.dealNumber || ""})` : "";
+      if (!confirm(`Delete this delivery?\n${label}`)) return;
+
+      DELIVERIES = DELIVERIES.filter(x => x.id !== id);
+      saveState();
+      SELECTED_DELIVERY_ID = null;
+      closeModal();
+      renderAll();
+    }
+
+    /******************************************************************
+     DETAIL PANEL
+    ******************************************************************/
+    function openDetailPanel(id) {
+      const d = DELIVERIES.find(x => x.id === id);
+      if (!d) return;
+      SELECTED_DELIVERY_ID = id;
+
+      const setText = (id, val) => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = val ?? "";
+      };
+
+      setText("detailTitle", d.customerName || "Customer");
+      setText("detailSubtitle", `${d.dealNumber || ""} • ${d.dept || ""}`);
+      setText("detailCustomer", d.customerName);
+      setText("detailDeal", d.dealNumber);
+      setText("detailCustNo", d.customerNumber);
+      setText("detailContact", d.contact);
+      setText("detailSuburb", d.suburb);
+      setText("detailPostcode", d.postcode);
+      setText("detailSalesperson", d.salesperson);
+      setText("detailBusinessManager", d.businessManager);
+
+      setText("detailVehicle", `${d.make || ""} ${d.model || ""}`);
+      setText("detailDesc", d.description);
+      setText("detailColour", d.colour);
+      setText("detailRego", d.rego);
+      setText("detailStock", d.stockNumber);
+      setText("detailVin", d.vin);
+
+      const when = `${d.deliveryDate || ""} ${d.deliveryTime || ""}`.trim();
+      setText("detailDateTime", when);
+      setText("detailDept", d.dept);
+      setText("detailPayment", d.paymentMethod);
+      setText("detailPaymentStatus", d.paymentStatus);
+      setText("detailFinanceStatus", d.financeStatus);
+      setText(
+        "detailLastUpdate",
+        d.lastUpdated ? new Date(d.lastUpdated).toLocaleString("en-AU") : "–"
+      );
+      setText("detailCurrentStatus", d.status || STATUS_STEPS[d.statusIndex] || "");
+
+      // Finalise button visibility
+      const finalBtn = document.getElementById("finaliseDeleteBtn");
+      if (finalBtn) {
+        if (d.statusIndex >= STATUS_STEPS.length - 1) finalBtn.classList.remove("hidden");
+        else finalBtn.classList.add("hidden");
+      }
+
+      updateTemplatePreview(d);
+    }
+
+    function refreshDetailPanel() {
+      if (!SELECTED_DELIVERY_ID) return;
+      const d = DELIVERIES.find(x => x.id === SELECTED_DELIVERY_ID);
+      if (!d) {
+        // If deleted, clear panel
+        document.getElementById("detailTitle").textContent = "Select a delivery";
+        document.getElementById("detailSubtitle").textContent = "Click any booking in the calendar";
+        document.getElementById("detailCurrentStatus").textContent = "";
+        document.getElementById("templatePreview").textContent =
+          "Select a delivery to preview the customer message.";
+        document.getElementById("finaliseDeleteBtn").classList.add("hidden");
+        return;
+      }
+      openDetailPanel(d.id);
+    }
+
+    function closeDetailPanel() {
+      SELECTED_DELIVERY_ID = null;
+      document.getElementById("detailTitle").textContent = "Select a delivery";
+      document.getElementById("detailSubtitle").textContent = "Click any booking in the calendar";
+      document.getElementById("detailBody").querySelectorAll(".detail-value").forEach(el => (el.textContent = ""));
+      document.getElementById("templatePreview").textContent =
+        "Select a delivery to preview the customer message.";
+      document.getElementById("finaliseDeleteBtn").classList.add("hidden");
+    }
+
+    /******************************************************************
+     STATUS JOURNEY MODAL
+    ******************************************************************/
+    function openStatusJourneyModal() {
+      if (!SELECTED_DELIVERY_ID) return;
+      const d = DELIVERIES.find(x => x.id === SELECTED_DELIVERY_ID);
+      if (!d) return;
+
+      const container = document.getElementById("statusJourneyContainer");
+      container.innerHTML = "";
+
+      STATUS_STEPS.forEach((step, idx) => {
+        const row = document.createElement("div");
+        row.className = "status-journey-step";
+        if (idx < d.statusIndex) row.classList.add("complete");
+        if (idx === d.statusIndex) row.classList.add("current");
+
+        row.innerHTML = `
+          <div class="status-dot"></div>
+          <div class="status-journey-label">
+            <strong>${step}</strong>
+            <span>${idx === d.statusIndex ? "Current stage" : idx < d.statusIndex ? "Completed" : "Upcoming"}</span>
+          </div>
+        `;
+        container.appendChild(row);
+      });
+
+      document.getElementById("statusModalInfo").textContent =
+        `${d.customerName || ""} • ${d.dealNumber || ""}`;
+      document.getElementById("statusModalBackdrop").classList.add("open");
+    }
+
+    function closeStatusJourneyModal() {
+      document.getElementById("statusModalBackdrop").classList.remove("open");
+    }
+
+    function handleNextStage() {
+      if (!SELECTED_DELIVERY_ID) return;
+      const d = DELIVERIES.find(x => x.id === SELECTED_DELIVERY_ID);
+      if (!d) return;
+      if (d.statusIndex >= STATUS_STEPS.length - 1) return;
+
+      d.statusIndex += 1;
+      d.status = STATUS_STEPS[d.statusIndex];
+      d.lastUpdated = new Date().toISOString();
+      saveState();
+      renderAll();
+      openStatusJourneyModal();
+    }
+
+    function handlePrevStage() {
+      if (!SELECTED_DELIVERY_ID) return;
+      const d = DELIVERIES.find(x => x.id === SELECTED_DELIVERY_ID);
+      if (!d) return;
+      if (d.statusIndex <= 0) return;
+
+      d.statusIndex -= 1;
+      d.status = STATUS_STEPS[d.statusIndex];
+      d.lastUpdated = new Date().toISOString();
+      saveState();
+      renderAll();
+      openStatusJourneyModal();
+    }
+
+    function handleFinaliseDelete() {
+      if (!SELECTED_DELIVERY_ID) return;
+      const d = DELIVERIES.find(x => x.id === SELECTED_DELIVERY_ID);
+      if (!d) return;
+      const label = `${d.customerName || ""} (${d.dealNumber || ""})`;
+      if (!confirm(`Finalize and remove this delivery from TRAX?\n${label}`)) return;
+
+      DELIVERIES = DELIVERIES.filter(x => x.id !== d.id);
+      saveState();
+      SELECTED_DELIVERY_ID = null;
+      closeStatusJourneyModal();
+      closeDetailPanel();
+      renderAll();
+    }
+
+    /******************************************************************
+     SETTINGS: STATUS + BUFFERS
+    ******************************************************************/
+    function renderStatusSettingsList() {
+      const container = document.getElementById("statusListContainer");
+      container.innerHTML = "";
+
+      STATUS_STEPS.forEach((status, idx) => {
+        const row = document.createElement("div");
+        row.className = "status-list-item";
+
+        const nameDiv = document.createElement("div");
+        nameDiv.className = "status-name";
+        nameDiv.textContent = status;
+
+        const bufferInput = document.createElement("input");
+        bufferInput.type = "number";
+        bufferInput.className = "status-buffer";
+        bufferInput.value = STATUS_BUFFERS[status] ?? 0;
+        bufferInput.min = 0;
+        bufferInput.max = 60;
+        bufferInput.addEventListener("change", () => {
+          STATUS_BUFFERS[status] = Number(bufferInput.value || 0);
+        });
+
+        const controls = document.createElement("div");
+        controls.className = "status-controls";
+        controls.innerHTML = `
+          <button class="var-btn" type="button" data-dir="up">▲</button>
+          <button class="var-btn" type="button" data-dir="down">▼</button>
+          <button class="var-btn" type="button" data-dir="del">✕</button>
+        `;
+
+        controls.querySelectorAll("button").forEach(btn => {
+          btn.addEventListener("click", () => {
+            const dir = btn.getAttribute("data-dir");
+            if (dir === "up" && idx > 0) {
+              const tmp = STATUS_STEPS[idx - 1];
+              STATUS_STEPS[idx - 1] = STATUS_STEPS[idx];
+              STATUS_STEPS[idx] = tmp;
+            } else if (dir === "down" && idx < STATUS_STEPS.length - 1) {
+              const tmp = STATUS_STEPS[idx + 1];
+              STATUS_STEPS[idx + 1] = STATUS_STEPS[idx];
+              STATUS_STEPS[idx] = tmp;
+            } else if (dir === "del") {
+              if (!confirm(`Remove status "${status}"?`)) return;
+              STATUS_STEPS.splice(idx, 1);
+              delete STATUS_BUFFERS[status];
+            }
+            renderStatusSettingsList();
+          });
+        });
+
+        row.appendChild(nameDiv);
+        row.appendChild(bufferInput);
+        row.appendChild(controls);
+        container.appendChild(row);
+      });
+    }
+
+    function openSettingsModal() {
+      renderStatusSettingsList();
+      document.getElementById("settingsBackdrop").classList.add("open");
+    }
+
+    function closeSettingsModal() {
+      document.getElementById("settingsBackdrop").classList.remove("open");
+    }
+
+    function handleAddStatus() {
+      const input = document.getElementById("newStatusInput");
+      const val = input.value.trim();
+      if (!val) return;
+      if (STATUS_STEPS.includes(val)) {
+        alert("That status already exists.");
+        return;
+      }
+      STATUS_STEPS.push(val);
+      STATUS_BUFFERS[val] = 0;
+      input.value = "";
+      renderStatusSettingsList();
+    }
+
+    function handleSaveSettings() {
+      saveState();
+      closeSettingsModal();
+      renderAll();
+    }
+  </script>
+  <script>
+    /******************************************************************
+     NOTIFY CUSTOMER (EMAIL + PREVIEW)
+    ******************************************************************/
+    function buildTemplateText(d) {
+      const status = d.status || STATUS_STEPS[d.statusIndex] || "";
+      const baseDate = new Date(d.deliveryDate);
+      const buffer = STATUS_BUFFERS[status] ?? 0;
+      const eta = new Date(baseDate);
+      eta.setDate(eta.getDate() + buffer);
+
+      const etaStr = eta.toLocaleDateString("en-AU", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+      });
+
+      return (
+        `Hi ${d.customerName || ""},\n\n` +
+        `This is a quick update regarding your vehicle (${d.make || ""} ${d.model || ""}).\n\n` +
+        `Current Status: ${status}\n` +
+        `Estimated Delivery: ${etaStr} at ${d.deliveryTime || "TBA"}\n\n` +
+        `If you have any questions, please reach out.\n\n` +
+        `Regards,\nBlackburn TRAX Delivery Hub`
+      );
+    }
+
+    function updateTemplatePreview(d) {
+      const preview = document.getElementById("templatePreview");
+      if (!preview) return;
+      if (!d) {
+        preview.textContent = "Select a delivery to preview the customer message.";
+        return;
+      }
+      preview.textContent = buildTemplateText(d);
+    }
+
+    function handleNotifyCustomer() {
+      if (!SELECTED_DELIVERY_ID) return;
+      const d = DELIVERIES.find(x => x.id === SELECTED_DELIVERY_ID);
+      if (!d) return;
+
+      const bodyText = buildTemplateText(d);
+      const subject = encodeURIComponent(`Your Vehicle Update – ${d.dealNumber || ""}`);
+      const body = encodeURIComponent(bodyText);
+      const email = encodeURIComponent(d.contact || "");
+
+      window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
+
+      d.lastNotified = new Date().toISOString();
+      d.lastUpdated = new Date().toISOString();
+      saveState();
+      updateStats();
+      updateTemplatePreview(d);
+    }
+
+    /******************************************************************
+     EXPORTS
+    ******************************************************************/
+    function toCsvRow(fields) {
+      return fields
+        .map(f => {
+          const val = f ?? "";
+          if (/[",\n]/.test(val)) return `"${val.replace(/"/g, '""')}"`;
+          return val;
+        })
+        .join(",");
+    }
+
+    function exportDeliveries(list, filename) {
+      if (!list || list.length === 0) {
+        alert("No deliveries to export.");
+        return;
+      }
+
+      const header = [
+        "Customer",
+        "Deal #",
+        "Customer #",
+        "Dept",
+        "Status",
+        "Delivery Date",
+        "Delivery Time",
+        "Duration",
+        "Salesperson",
+        "Business Manager",
+        "Make",
+        "Model",
+        "Description",
+        "Colour",
+        "Rego",
+        "Stock #",
+        "VIN",
+        "Payment Method",
+        "Payment Status",
+        "Finance Status",
+        "Suburb",
+        "Postcode",
+        "Contact",
+      ];
+
+      const rows = list.map(d =>
+        toCsvRow([
+          d.customerName,
+          d.dealNumber,
+          d.customerNumber,
+          d.dept,
+          d.status,
+          d.deliveryDate,
+          d.deliveryTime,
+          d.duration,
+          d.salesperson,
+          d.businessManager,
+          d.make,
+          d.model,
+          d.description,
+          d.colour,
+          d.rego,
+          d.stockNumber,
+          d.vin,
+          d.paymentMethod,
+          d.paymentStatus,
+          d.financeStatus,
+          d.suburb,
+          d.postcode,
+          d.contact,
+        ])
+      );
+
+      const csv = [toCsvRow(header), ...rows].join("\n");
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    /******************************************************************
+     EVENT WIRING & INIT
+    ******************************************************************/
+    function wireEvents() {
+      document.getElementById("themeToggleBtn")?.addEventListener("click", toggleTheme);
+      document.getElementById("todayBtn")?.addEventListener("click", goToday);
+      document.getElementById("prevBtn")?.addEventListener("click", goPrev);
+      document.getElementById("nextBtn")?.addEventListener("click", goNext);
+
+      document.querySelectorAll("#viewSwitcher .pill-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const v = btn.dataset.view;
+          if (v) setView(v);
+        });
+      });
+
+      document.getElementById("addDeliveryBtn")?.addEventListener("click", () =>
+        openAddModal(formatDateYMD(new Date()), "10:00")
+      );
+
+      document.getElementById("modalCloseBtn")?.addEventListener("click", closeModal);
+      document.getElementById("saveBtn")?.addEventListener("click", handleSaveDelivery);
+      document.getElementById("deleteBtn")?.addEventListener("click", handleDeleteDelivery);
+
+      document.getElementById("detailCloseBtn")?.addEventListener("click", closeDetailPanel);
+      document.getElementById("editFromDetailBtn")?.addEventListener("click", () => {
+        if (SELECTED_DELIVERY_ID) openEditModal(SELECTED_DELIVERY_ID);
+      });
+
+      document.getElementById("openStatusJourneyBtn")?.addEventListener("click", openStatusJourneyModal);
+      document.getElementById("statusModalCloseBtn")?.addEventListener("click", closeStatusJourneyModal);
+      document.getElementById("prevStageBtn")?.addEventListener("click", handlePrevStage);
+      document.getElementById("nextStageBtn")?.addEventListener("click", handleNextStage);
+      document.getElementById("finaliseDeleteBtn")?.addEventListener("click", handleFinaliseDelete);
+
+      document.getElementById("notifyBtn")?.addEventListener("click", handleNotifyCustomer);
+
+      document.getElementById("settingsBtn")?.addEventListener("click", openSettingsModal);
+      document.getElementById("settingsCloseBtn")?.addEventListener("click", closeSettingsModal);
+      document.getElementById("addStatusBtn")?.addEventListener("click", handleAddStatus);
+      document.getElementById("saveSettingsBtn")?.addEventListener("click", handleSaveSettings);
+
+      document.getElementById("exportAllBtn")?.addEventListener("click", () =>
+        exportDeliveries(DELIVERIES, "TRAX_All_Deliveries.csv")
+      );
+      document.getElementById("exportFilteredBtn")?.addEventListener("click", () =>
+        exportDeliveries(getFilteredDeliveries(), "TRAX_Filtered_Deliveries.csv")
+      );
+
+      ["filterDept", "filterStatus", "filterSalesperson"].forEach(id => {
+        document.getElementById(id)?.addEventListener("change", renderAll);
+      });
+      document.getElementById("filterSearch")?.addEventListener("input", renderAll);
+    }
+
+    function initTRAX() {
+      loadState();
+      applyTheme();
+      renderAll();
+      wireEvents();
+    }
+
+    document.addEventListener("DOMContentLoaded", initTRAX);
+  </script>
+</body>
+</html>
