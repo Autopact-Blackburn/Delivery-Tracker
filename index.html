@@ -1517,262 +1517,323 @@
     </div>
   </div>
   <script>
-    /******************************************************************
-     TRAX CORE STATE
-    ******************************************************************/
-    const STORAGE_KEYS = {
-      deliveries: "TRAX_DELIVERIES_V4",
-      statusSteps: "TRAX_STATUS_STEPS_V4",
-      buffers: "TRAX_STATUS_BUFFERS_V4",
-      theme: "TRAX_THEME_V4",
-    };
+  /******************************************************************
+   TRAX CORE STATE
+  ******************************************************************/
+  const STORAGE_KEYS = {
+    backup: "TRAX_BACKUP_V4",
+    theme: "TRAX_THEME_V4",
+  };
 
-    let DELIVERIES = [];
-    let STATUS_STEPS = [];
-    let STATUS_BUFFERS = {};
-    let CURRENT_VIEW = "month";
-    let CURRENT_DATE = new Date();
-    let ACTIVE_STATUS_FILTER = "";
-    let SELECTED_DELIVERY_ID = null;
+  // 👇 PASTE YOUR GOOGLE WEB APP URL HERE
+  const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwjs5uLHVt-Q1gg0-E5HeeVTvD-fkkjKmeCH4GEzQpDPbPefPmaCxrroWWAonTASIBfmw/exec";
 
-    /******************************************************************
- SHARED STORAGE (GitHub JSON)
-******************************************************************/
+  const DEFAULT_STATUS_STEPS = [
+    "Sold",
+    "Pending",
+    "In Transit",
+    "At Dealership",
+    "PD Started",
+    "Ready for Delivery",
+    "Delivered",
+  ];
 
-// Location of shared JSON file in your GitHub repo
-const REMOTE_JSON_URL = "https://autopact-blackburn.github.io/Delivery-Tracker/data/deliveries.json";
-const REMOTE_JSON_PATH = "data/deliveries.json"; // for PUT/uploads via GitHub API (if added later)
+  let DELIVERIES = [];
+  let STATUS_STEPS = [];
+  let STATUS_BUFFERS = {};
+  let CURRENT_VIEW = "month";
+  let CURRENT_DATE = new Date();
+  let ACTIVE_STATUS_FILTER = "";
+  let SELECTED_DELIVERY_ID = null;
 
-// Load data from remote JSON file
-/******************************************************************
- SHARED STORAGE (GitHub JSON)
-******************************************************************/
-
-const REMOTE_JSON_URL = "https://autopact-blackburn.github.io/Delivery-Tracker/data/deliveries.json";
-
-/* Load from GitHub JSON */
-async function loadState() {
-  try {
-    const res = await fetch(REMOTE_JSON_URL, { cache: "no-store" });
-
-    if (!res.ok) {
-      console.warn("Remote JSON not available — starting with empty calendar.");
-      DELIVERIES = [];
-      STATUS_STEPS = ["Sold", "Pending", "In Transit", "At Dealership", "PD Started", "Ready for Delivery", "Delivered"];
-      STATUS_BUFFERS = {};
-      return;
+  /******************************************************************
+   API HELPER (Google Apps Script backend)
+  ******************************************************************/
+  async function apiRequest(payload) {
+    if (!WEB_APP_URL || WEB_APP_URL.includes("PASTE_YOUR_WEB_APP_URL_HERE")) {
+      console.warn("WEB_APP_URL not configured, using local backup only.");
+      return { ok: false };
     }
 
-    const data = await res.json();
-
-    DELIVERIES = data.deliveries || [];
-    STATUS_STEPS = data.statusSteps || ["Sold", "Pending", "In Transit", "At Dealership", "PD Started", "Ready for Delivery", "Delivered"];
-    STATUS_BUFFERS = data.buffers || {};
-
-    // Ensure buffers exist
-    STATUS_STEPS.forEach(step => {
-      if (typeof STATUS_BUFFERS[step] !== "number") STATUS_BUFFERS[step] = 0;
+    const res = await fetch(WEB_APP_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
     });
 
-  } catch (err) {
-    console.error("Error fetching remote JSON:", err);
-    DELIVERIES = [];
-    STATUS_STEPS = ["Sold", "Pending", "In Transit", "At Dealership", "PD Started", "Ready for Delivery", "Delivered"];
-    STATUS_BUFFERS = {};
+    if (!res.ok) {
+      throw new Error("API request failed: " + res.status);
+    }
+    return res.json();
   }
-}
 
-/* Temporary local backup until GitHub WRITE is enabled */
-function saveState() {
-  localStorage.setItem("TRAX_BACKUP", JSON.stringify({
-    deliveries: DELIVERIES,
-    statusSteps: STATUS_STEPS,
-    buffers: STATUS_BUFFERS
-  }));
+  /******************************************************************
+   LOAD / SAVE STATE (Sheets + local backup)
+  ******************************************************************/
+  async function loadState() {
+    // Defaults
+    DELIVERIES = [];
+    STATUS_STEPS = [...DEFAULT_STATUS_STEPS];
+    STATUS_BUFFERS = {};
 
-  console.log("Saved local backup only — GitHub writes not yet enabled.");
-}
+    // Try remote (Google Sheets)
+    try {
+      const data = await apiRequest({ action: "getAll" });
+      if (data && data.ok !== false) {
+        DELIVERIES = Array.isArray(data.deliveries) ? data.deliveries : [];
+        STATUS_STEPS = Array.isArray(data.statusSteps) && data.statusSteps.length
+          ? data.statusSteps
+          : [...DEFAULT_STATUS_STEPS];
+        STATUS_BUFFERS = data.buffers || {};
 
-
-
-    /******************************************************************
-     THEME
-    ******************************************************************/
-    function applyTheme() {
-      const theme = localStorage.getItem(STORAGE_KEYS.theme) || "dark";
-      if (theme === "light") document.body.classList.add("light-theme");
-      else document.body.classList.remove("light-theme");
-    }
-
-    function toggleTheme() {
-      const current = localStorage.getItem(STORAGE_KEYS.theme) || "dark";
-      const next = current === "light" ? "dark" : "light";
-      localStorage.setItem(STORAGE_KEYS.theme, next);
-      applyTheme();
-    }
-
-    /******************************************************************
-     DATE HELPERS
-    ******************************************************************/
-    function startOfWeek(date) {
-      const d = new Date(date);
-      const day = d.getDay();
-      d.setDate(d.getDate() - day);
-      return d;
-    }
-
-    function sameDay(a, b) {
-      return (
-        a.getFullYear() === b.getFullYear() &&
-        a.getMonth() === b.getMonth() &&
-        a.getDate() === b.getDate()
-      );
-    }
-
-    function formatDateYMD(d) {
-      return d.toISOString().split("T")[0];
-    }
-
-    /******************************************************************
-     FILTER ENGINE
-    ******************************************************************/
-    function getFilteredDeliveries() {
-      const dept = document.getElementById("filterDept")?.value || "";
-      const status = document.getElementById("filterStatus")?.value || "";
-      const salesperson = document.getElementById("filterSalesperson")?.value || "";
-      const search = (document.getElementById("filterSearch")?.value || "").toLowerCase();
-
-      return DELIVERIES.filter(d => {
-        if (dept && d.dept !== dept) return false;
-        if (status && d.status !== status) return false;
-        if (ACTIVE_STATUS_FILTER && d.status !== ACTIVE_STATUS_FILTER) return false;
-        if (salesperson && d.salesperson !== salesperson) return false;
-
-        if (search) {
-          const hay = [
-            d.customerName,
-            d.dealNumber,
-            d.rego,
-            d.stockNumber,
-            d.salesperson,
-            d.businessManager,
-          ]
-            .join(" ")
-            .toLowerCase();
-          if (!hay.includes(search)) return false;
-        }
-
-        return true;
-      });
-    }
-
-    function refreshSalespersonFilter() {
-      const sel = document.getElementById("filterSalesperson");
-      if (!sel) return;
-      const salesSet = new Set(DELIVERIES.map(d => d.salesperson).filter(Boolean));
-      sel.innerHTML = '<option value="">All</option>';
-      [...salesSet].sort().forEach(sp => {
-        const opt = document.createElement("option");
-        opt.value = sp;
-        opt.textContent = sp;
-        sel.appendChild(opt);
-      });
-    }
-
-    function refreshStatusFilterDropdown() {
-      const sel = document.getElementById("filterStatus");
-      if (!sel) return;
-      sel.innerHTML = '<option value="">All</option>';
-      STATUS_STEPS.forEach(s => {
-        const opt = document.createElement("option");
-        opt.value = s;
-        opt.textContent = s;
-        sel.appendChild(opt);
-      });
-    }
-
-    /******************************************************************
-     STATUS TILES
-    ******************************************************************/
-    function renderStatusTiles() {
-      const container = document.getElementById("statusTiles");
-      if (!container) return;
-      container.innerHTML = "";
-
-      STATUS_STEPS.forEach(status => {
-        const count = DELIVERIES.filter(d => d.status === status).length;
-        const div = document.createElement("div");
-        div.className = "status-tile";
-        if (ACTIVE_STATUS_FILTER === status) div.classList.add("active");
-        div.dataset.status = status;
-        div.innerHTML = `
-          <div class="status-tile-label">${status}</div>
-          <div class="status-tile-count">${count}</div>
-          <div class="status-tile-sub">in this stage</div>
-        `;
-        div.addEventListener("click", () => {
-          if (ACTIVE_STATUS_FILTER === status) {
-            ACTIVE_STATUS_FILTER = "";
-          } else {
-            ACTIVE_STATUS_FILTER = status;
-            const statusSelect = document.getElementById("filterStatus");
-            if (statusSelect) statusSelect.value = "";
-          }
-          renderAll();
+        // Ensure buffers exist for each step
+        STATUS_STEPS.forEach((s) => {
+          if (typeof STATUS_BUFFERS[s] !== "number") STATUS_BUFFERS[s] = 0;
         });
-        container.appendChild(div);
-      });
+
+        // sync local backup
+        localStorage.setItem(
+          STORAGE_KEYS.backup,
+          JSON.stringify({
+            deliveries: DELIVERIES,
+            statusSteps: STATUS_STEPS,
+            buffers: STATUS_BUFFERS,
+          })
+        );
+        console.log("Loaded from Google Sheets.");
+        return;
+      }
+    } catch (err) {
+      console.warn("Remote load failed, falling back to local backup:", err);
     }
 
-    /******************************************************************
-     OVERVIEW STATS
-    ******************************************************************/
-    function updateStats() {
-      const total = DELIVERIES.length;
-      const now = new Date();
-      const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-      const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-      const nextStart = new Date(now.getFullYear(), now.getMonth() + 1, 1);
-      const nextEnd = new Date(now.getFullYear(), now.getMonth() + 2, 0);
-      const sevenDaysAgo = new Date();
-      sevenDaysAgo.setDate(now.getDate() - 7);
+    // Fallback to local backup (if any)
+    try {
+      const raw = localStorage.getItem(STORAGE_KEYS.backup);
+      if (raw) {
+        const backup = JSON.parse(raw);
+        DELIVERIES = backup.deliveries || [];
+        STATUS_STEPS =
+          (backup.statusSteps && backup.statusSteps.length && backup.statusSteps) ||
+          [...DEFAULT_STATUS_STEPS];
+        STATUS_BUFFERS = backup.buffers || {};
+        STATUS_STEPS.forEach((s) => {
+          if (typeof STATUS_BUFFERS[s] !== "number") STATUS_BUFFERS[s] = 0;
+        });
+        console.log("Loaded from local backup.");
+      }
+    } catch (err) {
+      console.error("Error reading local backup:", err);
+    }
+  }
 
-      let thisMonth = 0;
-      let nextMonth = 0;
-      let delivered = 0;
-      let pending = 0;
-      let stale = 0;
-      let nextMonthInTransit = 0;
+  // Fire-and-forget; UI uses local arrays immediately
+  async function saveState() {
+    // Always keep a browser backup as well
+    localStorage.setItem(
+      STORAGE_KEYS.backup,
+      JSON.stringify({
+        deliveries: DELIVERIES,
+        statusSteps: STATUS_STEPS,
+        buffers: STATUS_BUFFERS,
+      })
+    );
 
-      DELIVERIES.forEach(d => {
-        const dDate = new Date(d.deliveryDate);
-        if (dDate >= monthStart && dDate <= monthEnd) thisMonth++;
-        if (dDate >= nextStart && dDate <= nextEnd) nextMonth++;
+    try {
+      await apiRequest({
+        action: "bulkUpdate",
+        deliveries: DELIVERIES,
+        statusSteps: STATUS_STEPS,
+        buffers: STATUS_BUFFERS,
+      });
+      console.log("Synced to Google Sheets.");
+    } catch (err) {
+      console.warn("Failed to sync to Google Sheets:", err);
+    }
+  }
 
-        if (d.status === STATUS_STEPS[STATUS_STEPS.length - 1]) {
-          delivered++;
+  /******************************************************************
+   THEME
+  ******************************************************************/
+  function applyTheme() {
+    const theme = localStorage.getItem(STORAGE_KEYS.theme) || "dark";
+    if (theme === "light") document.body.classList.add("light-theme");
+    else document.body.classList.remove("light-theme");
+  }
+
+  function toggleTheme() {
+    const current = localStorage.getItem(STORAGE_KEYS.theme) || "dark";
+    const next = current === "light" ? "dark" : "light";
+    localStorage.setItem(STORAGE_KEYS.theme, next);
+    applyTheme();
+  }
+
+  /******************************************************************
+   DATE HELPERS
+  ******************************************************************/
+  function startOfWeek(date) {
+    const d = new Date(date);
+    const day = d.getDay();
+    d.setDate(d.getDate() - day);
+    return d;
+  }
+
+  function sameDay(a, b) {
+    return (
+      a.getFullYear() === b.getFullYear() &&
+      a.getMonth() === b.getMonth() &&
+      a.getDate() === b.getDate()
+    );
+  }
+
+  function formatDateYMD(d) {
+    return d.toISOString().split("T")[0];
+  }
+
+  /******************************************************************
+   FILTER ENGINE
+  ******************************************************************/
+  function getFilteredDeliveries() {
+    const dept = document.getElementById("filterDept")?.value || "";
+    const status = document.getElementById("filterStatus")?.value || "";
+    const salesperson = document.getElementById("filterSalesperson")?.value || "";
+    const search = (document.getElementById("filterSearch")?.value || "").toLowerCase();
+
+    return DELIVERIES.filter((d) => {
+      if (dept && d.dept !== dept) return false;
+      if (status && d.status !== status) return false;
+      if (ACTIVE_STATUS_FILTER && d.status !== ACTIVE_STATUS_FILTER) return false;
+      if (salesperson && d.salesperson !== salesperson) return false;
+
+      if (search) {
+        const hay = [
+          d.customerName,
+          d.dealNumber,
+          d.rego,
+          d.stockNumber,
+          d.salesperson,
+          d.businessManager,
+        ]
+          .join(" ")
+          .toLowerCase();
+        if (!hay.includes(search)) return false;
+      }
+
+      return true;
+    });
+  }
+
+  function refreshSalespersonFilter() {
+    const sel = document.getElementById("filterSalesperson");
+    if (!sel) return;
+    const salesSet = new Set(DELIVERIES.map((d) => d.salesperson).filter(Boolean));
+    sel.innerHTML = '<option value="">All</option>';
+    [...salesSet].sort().forEach((sp) => {
+      const opt = document.createElement("option");
+      opt.value = sp;
+      opt.textContent = sp;
+      sel.appendChild(opt);
+    });
+  }
+
+  function refreshStatusFilterDropdown() {
+    const sel = document.getElementById("filterStatus");
+    if (!sel) return;
+    sel.innerHTML = '<option value="">All</option>';
+    STATUS_STEPS.forEach((s) => {
+      const opt = document.createElement("option");
+      opt.value = s;
+      opt.textContent = s;
+      sel.appendChild(opt);
+    });
+  }
+
+  /******************************************************************
+   STATUS TILES
+  ******************************************************************/
+  function renderStatusTiles() {
+    const container = document.getElementById("statusTiles");
+    if (!container) return;
+    container.innerHTML = "";
+
+    STATUS_STEPS.forEach((status) => {
+      const count = DELIVERIES.filter((d) => d.status === status).length;
+      const div = document.createElement("div");
+      div.className = "status-tile";
+      if (ACTIVE_STATUS_FILTER === status) div.classList.add("active");
+      div.dataset.status = status;
+      div.innerHTML = `
+        <div class="status-tile-label">${status}</div>
+        <div class="status-tile-count">${count}</div>
+        <div class="status-tile-sub">in this stage</div>
+      `;
+      div.addEventListener("click", () => {
+        if (ACTIVE_STATUS_FILTER === status) {
+          ACTIVE_STATUS_FILTER = "";
         } else {
-          pending++;
+          ACTIVE_STATUS_FILTER = status;
+          const statusSelect = document.getElementById("filterStatus");
+          if (statusSelect) statusSelect.value = "";
         }
-
-        if (d.lastUpdated && new Date(d.lastUpdated) < sevenDaysAgo && d.status !== STATUS_STEPS[STATUS_STEPS.length - 1]) {
-          stale++;
-        }
-
-        if (d.status === "In Transit" && dDate >= nextStart && dDate <= nextEnd) {
-          nextMonthInTransit++;
-        }
+        renderAll();
       });
+      container.appendChild(div);
+    });
+  }
 
-      document.getElementById("statTotal").textContent = total;
-      document.getElementById("statThisMonth").textContent = thisMonth;
-      document.getElementById("statNextMonth").textContent = nextMonth;
-      document.getElementById("statStale").textContent = stale;
-      document.getElementById("statPendingText").textContent = `${pending} pending`;
-      document.getElementById("statThisMonthDelivered").textContent = `${delivered} delivered`;
-      document.getElementById("statNextMonthInTransit").textContent = `${nextMonthInTransit} in transit`;
-    }
-  </script>
+  /******************************************************************
+   OVERVIEW STATS
+  ******************************************************************/
+  function updateStats() {
+    const total = DELIVERIES.length;
+    const now = new Date();
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+    const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+    const nextStart = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+    const nextEnd = new Date(now.getFullYear(), now.getMonth() + 2, 0);
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(now.getDate() - 7);
+
+    let thisMonth = 0;
+    let nextMonth = 0;
+    let delivered = 0;
+    let pending = 0;
+    let stale = 0;
+    let nextMonthInTransit = 0;
+
+    DELIVERIES.forEach((d) => {
+      const dDate = new Date(d.deliveryDate);
+      if (dDate >= monthStart && dDate <= monthEnd) thisMonth++;
+      if (dDate >= nextStart && dDate <= nextEnd) nextMonth++;
+
+      if (d.status === STATUS_STEPS[STATUS_STEPS.length - 1]) {
+        delivered++;
+      } else {
+        pending++;
+      }
+
+      if (
+        d.lastUpdated &&
+        new Date(d.lastUpdated) < sevenDaysAgo &&
+        d.status !== STATUS_STEPS[STATUS_STEPS.length - 1]
+      ) {
+        stale++;
+      }
+
+      if (d.status === "In Transit" && dDate >= nextStart && dDate <= nextEnd) {
+        nextMonthInTransit++;
+      }
+    });
+
+    document.getElementById("statTotal").textContent = total;
+    document.getElementById("statThisMonth").textContent = thisMonth;
+    document.getElementById("statNextMonth").textContent = nextMonth;
+    document.getElementById("statStale").textContent = stale;
+    document.getElementById("statPendingText").textContent = `${pending} pending`;
+    document.getElementById("statThisMonthDelivered").textContent = `${delivered} delivered`;
+    document.getElementById("statNextMonthInTransit").textContent = `${nextMonthInTransit} in transit`;
+  }
+</script>
   <script>
     /******************************************************************
      CALENDAR HEADER DATE LABEL
@@ -2740,14 +2801,17 @@ function saveState() {
       document.getElementById("filterSearch")?.addEventListener("input", renderAll);
     }
 
-    function initTRAX() {
-      loadState();
-      applyTheme();
-      renderAll();
-      wireEvents();
-    }
+    async function initTRAX() {
+  applyTheme();
+  await loadState();   // wait for Google Sheets before drawing
+  renderAll();
+  wireEvents();
+}
 
-    document.addEventListener("DOMContentLoaded", initTRAX);
+document.addEventListener("DOMContentLoaded", () => {
+  initTRAX().catch((err) => console.error("TRAX init failed:", err));
+});
+
   </script>
 </body>
 </html>
