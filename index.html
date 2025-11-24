@@ -1578,7 +1578,9 @@
 
     // Try remote (Google Sheets)
     try {
-      const data = await apiRequest({ action: "getAll" });
+      const res = await fetch(WEB_APP_URL + "?mode=admin");
+const data = await res.json();
+
       if (data && data.ok !== false) {
         DELIVERIES = Array.isArray(data.deliveries) ? data.deliveries : [];
         STATUS_STEPS = Array.isArray(data.statusSteps) && data.statusSteps.length
@@ -1640,12 +1642,20 @@
     );
 
     try {
-      await apiRequest({
-        action: "bulkUpdate",
-        deliveries: DELIVERIES,
-        statusSteps: STATUS_STEPS,
-        buffers: STATUS_BUFFERS,
-      });
+      await fetch(WEB_APP_URL, {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    mode: "admin-save",
+    deliveries: DELIVERIES,
+    statusSteps: STATUS_STEPS,
+    buffers: STATUS_BUFFERS
+  })
+})
+  .then(r => r.json())
+  .then(j => console.log("Google Sheets save:", j))
+  .catch(err => console.error("Save error:", err));
+
       console.log("Synced to Google Sheets.");
     } catch (err) {
       console.warn("Failed to sync to Google Sheets:", err);
