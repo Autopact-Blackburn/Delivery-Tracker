@@ -1536,37 +1536,64 @@
     let SELECTED_DELIVERY_ID = null;
 
     /******************************************************************
-     STORAGE
-    ******************************************************************/
-    function loadState() {
-      try {
-        const rawDel = localStorage.getItem(STORAGE_KEYS.deliveries);
-        DELIVERIES = rawDel ? JSON.parse(rawDel) : [];
+ SHARED STORAGE (GitHub JSON)
+******************************************************************/
 
-        const rawSteps = localStorage.getItem(STORAGE_KEYS.statusSteps);
-        STATUS_STEPS = rawSteps
-          ? JSON.parse(rawSteps)
-          : ["Sold", "Pending", "In Transit", "At Dealership", "PD Started", "Ready for Delivery", "Delivered"];
+// Location of shared JSON file in your GitHub repo
+const REMOTE_JSON_URL = "https://autopact-blackburn.github.io/Delivery-Tracker/data/deliveries.json";
+const REMOTE_JSON_PATH = "data/deliveries.json"; // for PUT/uploads via GitHub API (if added later)
 
-        const rawBuffers = localStorage.getItem(STORAGE_KEYS.buffers);
-        STATUS_BUFFERS = rawBuffers ? JSON.parse(rawBuffers) : {};
-        STATUS_STEPS.forEach(s => {
-          if (typeof STATUS_BUFFERS[s] !== "number") STATUS_BUFFERS[s] = 0;
-        });
-      } catch (e) {
-        console.error("Load state error", e);
-      }
+// Load data from remote JSON file
+/******************************************************************
+ SHARED STORAGE (GitHub JSON)
+******************************************************************/
+
+const REMOTE_JSON_URL = "https://autopact-blackburn.github.io/Delivery-Tracker/data/deliveries.json";
+
+/* Load from GitHub JSON */
+async function loadState() {
+  try {
+    const res = await fetch(REMOTE_JSON_URL, { cache: "no-store" });
+
+    if (!res.ok) {
+      console.warn("Remote JSON not available — starting with empty calendar.");
+      DELIVERIES = [];
+      STATUS_STEPS = ["Sold", "Pending", "In Transit", "At Dealership", "PD Started", "Ready for Delivery", "Delivered"];
+      STATUS_BUFFERS = {};
+      return;
     }
 
-    function saveState() {
-      try {
-        localStorage.setItem(STORAGE_KEYS.deliveries, JSON.stringify(DELIVERIES));
-        localStorage.setItem(STORAGE_KEYS.statusSteps, JSON.stringify(STATUS_STEPS));
-        localStorage.setItem(STORAGE_KEYS.buffers, JSON.stringify(STATUS_BUFFERS));
-      } catch (e) {
-        console.error("Save state error", e);
-      }
-    }
+    const data = await res.json();
+
+    DELIVERIES = data.deliveries || [];
+    STATUS_STEPS = data.statusSteps || ["Sold", "Pending", "In Transit", "At Dealership", "PD Started", "Ready for Delivery", "Delivered"];
+    STATUS_BUFFERS = data.buffers || {};
+
+    // Ensure buffers exist
+    STATUS_STEPS.forEach(step => {
+      if (typeof STATUS_BUFFERS[step] !== "number") STATUS_BUFFERS[step] = 0;
+    });
+
+  } catch (err) {
+    console.error("Error fetching remote JSON:", err);
+    DELIVERIES = [];
+    STATUS_STEPS = ["Sold", "Pending", "In Transit", "At Dealership", "PD Started", "Ready for Delivery", "Delivered"];
+    STATUS_BUFFERS = {};
+  }
+}
+
+/* Temporary local backup until GitHub WRITE is enabled */
+function saveState() {
+  localStorage.setItem("TRAX_BACKUP", JSON.stringify({
+    deliveries: DELIVERIES,
+    statusSteps: STATUS_STEPS,
+    buffers: STATUS_BUFFERS
+  }));
+
+  console.log("Saved local backup only — GitHub writes not yet enabled.");
+}
+
+
 
     /******************************************************************
      THEME
