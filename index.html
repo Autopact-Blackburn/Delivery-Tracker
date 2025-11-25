@@ -1516,17 +1516,21 @@
       </div>
     </div>
   </div>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
   /******************************************************************
-   TRAX CORE STATE
+   TRAX CORE STATE – SUPABASE VERSION
   ******************************************************************/
   const STORAGE_KEYS = {
     backup: "TRAX_BACKUP_V4",
     theme: "TRAX_THEME_V4",
   };
 
-  // 👇 PASTE YOUR GOOGLE WEB APP URL HERE
-  const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwjs5uLHVt-Q1gg0-E5HeeVTvD-fkkjKmeCH4GEzQpDPbPefPmaCxrroWWAonTASIBfmw/exec";
+  // 🔑 Supabase config – PASTE YOUR VALUES HERE
+  const SUPABASE_URL = "https://anaedormisbzriacpztrk.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFuYWVkb3JtaXNienJpYWNwenRrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQwMTA5MjEsImV4cCI6MjA3OTU4NjkyMX0.T5xIa5fwCrKrBW-blkUKQi9E15_WJgDsZZOYGcNrfUc";
+
+  const supa = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
   const DEFAULT_STATUS_STEPS = [
     "Sold",
@@ -1547,28 +1551,76 @@
   let SELECTED_DELIVERY_ID = null;
 
   /******************************************************************
-   API HELPER (Google Apps Script backend)
+   SUPABASE MAPPERS
   ******************************************************************/
-  async function apiRequest(payload) {
-    if (!WEB_APP_URL || WEB_APP_URL.includes("PASTE_YOUR_WEB_APP_URL_HERE")) {
-      console.warn("WEB_APP_URL not configured, using local backup only.");
-      return { ok: false };
-    }
+  function mapRowToDelivery(row) {
+    return {
+      id: row.id,
+      customerName: row.customer_name,
+      dealNumber: row.deal_number,
+      customerNumber: row.customer_number,
+      make: row.make,
+      model: row.model,
+      description: row.description,
+      colour: row.colour,
+      rego: row.rego,
+      stockNumber: row.stock_number,
+      vin: row.vin,
+      dept: row.dept,
+      paymentMethod: row.payment_method,
+      financeStatus: row.finance_status,
+      paymentStatus: row.payment_status,
+      dealDate: row.deal_date || "",
+      deliveryDate: row.delivery_date || "",
+      deliveryTime: row.delivery_time || "10:00",
+      duration: row.duration || 90,
+      salesperson: row.salesperson,
+      businessManager: row.business_manager,
+      suburb: row.suburb,
+      postcode: row.postcode,
+      contact: row.contact,
+      status: row.status,
+      statusIndex: row.status_index ?? 0,
+      lastUpdated: row.last_updated,
+      lastNotified: row.last_notified,
+    };
+  }
 
-    const res = await fetch(WEB_APP_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
-
-    if (!res.ok) {
-      throw new Error("API request failed: " + res.status);
-    }
-    return res.json();
+  function mapDeliveryToRow(d) {
+    return {
+      id: d.id,
+      customer_name: d.customerName,
+      deal_number: d.dealNumber,
+      customer_number: d.customerNumber,
+      make: d.make,
+      model: d.model,
+      description: d.description,
+      colour: d.colour,
+      rego: d.rego,
+      stock_number: d.stockNumber,
+      vin: d.vin,
+      dept: d.dept,
+      payment_method: d.paymentMethod,
+      finance_status: d.financeStatus,
+      payment_status: d.paymentStatus,
+      deal_date: d.dealDate || null,
+      delivery_date: d.deliveryDate || null,
+      delivery_time: d.deliveryTime || null,
+      duration: d.duration || 90,
+      salesperson: d.salesperson,
+      business_manager: d.businessManager,
+      suburb: d.suburb,
+      postcode: d.postcode,
+      contact: d.contact,
+      status: d.status,
+      status_index: d.statusIndex ?? 0,
+      last_updated: d.lastUpdated || null,
+      last_notified: d.lastNotified || null,
+    };
   }
 
   /******************************************************************
-   LOAD / SAVE STATE (Sheets + local backup)
+   LOAD / SAVE STATE (Supabase + local backup)
   ******************************************************************/
   async function loadState() {
     // Defaults
@@ -1576,54 +1628,58 @@
     STATUS_STEPS = [...DEFAULT_STATUS_STEPS];
     STATUS_BUFFERS = {};
 
-    // Try remote (Google Sheets)
+    // 1) Try Supabase
     try {
-      function loadAdminFromGoogle() {
-  return new Promise((resolve, reject) => {
-    const url = `${GOOGLE_URL}?mode=admin&callback=traxJSONP`;
+      // Settings row
+      const { data: settingsRow, error: settingsError } =
+        await supa
+          .from("delivery_settings")
+          .select("status_steps, status_buffers")
+          .eq("id", "default")
+          .maybeSingle();
 
-    const script = document.createElement("script");
-    script.src = url;
-
-    window.traxJSONP = (response) => {
-      resolve(response);
-      script.remove();
-    };
-
-    script.onerror = reject;
-    document.body.appendChild(script);
-  });
-}
-
-      if (data && data.ok !== false) {
-        DELIVERIES = Array.isArray(data.deliveries) ? data.deliveries : [];
-        STATUS_STEPS = Array.isArray(data.statusSteps) && data.statusSteps.length
-          ? data.statusSteps
-          : [...DEFAULT_STATUS_STEPS];
-        STATUS_BUFFERS = data.buffers || {};
-
-        // Ensure buffers exist for each step
-        STATUS_STEPS.forEach((s) => {
-          if (typeof STATUS_BUFFERS[s] !== "number") STATUS_BUFFERS[s] = 0;
-        });
-
-        // sync local backup
-        localStorage.setItem(
-          STORAGE_KEYS.backup,
-          JSON.stringify({
-            deliveries: DELIVERIES,
-            statusSteps: STATUS_STEPS,
-            buffers: STATUS_BUFFERS,
-          })
-        );
-        console.log("Loaded from Google Sheets.");
-        return;
+      if (settingsError && settingsError.code !== "PGRST116") {
+        console.warn("Settings load error:", settingsError);
       }
+
+      if (settingsRow?.status_steps && Array.isArray(settingsRow.status_steps)) {
+        STATUS_STEPS = settingsRow.status_steps;
+      }
+
+      STATUS_BUFFERS = settingsRow?.status_buffers || {};
+
+      // Ensure every status has a buffer number
+      STATUS_STEPS.forEach((s) => {
+        if (typeof STATUS_BUFFERS[s] !== "number") STATUS_BUFFERS[s] = 0;
+      });
+
+      // Deliveries
+      const { data: rows, error: delError } =
+        await supa
+          .from("deliveries")
+          .select("*");
+
+      if (delError) throw delError;
+
+      DELIVERIES = (rows || []).map(mapRowToDelivery);
+
+      // Sync local backup
+      localStorage.setItem(
+        STORAGE_KEYS.backup,
+        JSON.stringify({
+          deliveries: DELIVERIES,
+          statusSteps: STATUS_STEPS,
+          buffers: STATUS_BUFFERS,
+        })
+      );
+
+      console.log("Loaded from Supabase.");
+      return;
     } catch (err) {
-      console.warn("Remote load failed, falling back to local backup:", err);
+      console.warn("Supabase load failed, using local backup if available:", err);
     }
 
-    // Fallback to local backup (if any)
+    // 2) Fallback to local backup
     try {
       const raw = localStorage.getItem(STORAGE_KEYS.backup);
       if (raw) {
@@ -1643,9 +1699,8 @@
     }
   }
 
-  // Fire-and-forget; UI uses local arrays immediately
   async function saveState() {
-    // Always keep a browser backup as well
+    // Always keep a local browser backup
     localStorage.setItem(
       STORAGE_KEYS.backup,
       JSON.stringify({
@@ -1655,24 +1710,47 @@
       })
     );
 
+    // Push to Supabase (best-effort)
     try {
-      function saveAdminToGoogle(payload) {
-  return new Promise((resolve, reject) => {
-    const encoded = encodeURIComponent(JSON.stringify(payload));
-    const url = `${GOOGLE_URL}?mode=admin-save&data=${encoded}&callback=traxJSONP`;
+      // 1) Delete rows that no longer exist
+      const { data: existing, error: existingError } =
+        await supa.from("deliveries").select("id");
 
-    const script = document.createElement("script");
-    script.src = url;
+      if (existingError) throw existingError;
 
-    window.traxJSONP = (response) => {
-      resolve(response);
-      script.remove();
-    };
+      const existingIds = (existing || []).map((r) => r.id);
+      const currentIds = DELIVERIES.map((d) => d.id);
+      const toDelete = existingIds.filter((id) => !currentIds.includes(id));
 
-    script.onerror = reject;
-    document.body.appendChild(script);
-  });
-}
+      if (toDelete.length > 0) {
+        const { error: deleteError } =
+          await supa.from("deliveries").delete().in("id", toDelete);
+        if (deleteError) throw deleteError;
+      }
+
+      // 2) Upsert current deliveries
+      const rows = DELIVERIES.map(mapDeliveryToRow);
+      if (rows.length > 0) {
+        const { error: upsertError } =
+          await supa.from("deliveries").upsert(rows, { onConflict: "id" });
+        if (upsertError) throw upsertError;
+      }
+
+      // 3) Upsert settings row
+      const { error: settingsUpsertError } =
+        await supa.from("delivery_settings").upsert({
+          id: "default",
+          status_steps: STATUS_STEPS,
+          status_buffers: STATUS_BUFFERS,
+        });
+
+      if (settingsUpsertError) throw settingsUpsertError;
+
+      console.log("Saved to Supabase.");
+    } catch (err) {
+      console.warn("Supabase save failed, local backup only:", err);
+    }
+  }
 
   /******************************************************************
    THEME
@@ -1855,7 +1933,7 @@
     document.getElementById("statThisMonthDelivered").textContent = `${delivered} delivered`;
     document.getElementById("statNextMonthInTransit").textContent = `${nextMonthInTransit} in transit`;
   }
-</script>
+  </script>
   <script>
     /******************************************************************
      CALENDAR HEADER DATE LABEL
@@ -2825,7 +2903,7 @@
 
     async function initTRAX() {
   applyTheme();
-  await loadState();   // wait for Google Sheets before drawing
+      await loadState();
   renderAll();
   wireEvents();
 }
@@ -2838,3 +2916,4 @@ document.addEventListener("DOMContentLoaded", () => {
 </body>
 
 </html>
+
