@@ -1,9 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
+<meta charset="UTF-8" />
 <title>Your Vehicle Delivery – TRAX Portal</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<!-- Supabase Client -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <style>
   body {
     margin: 0;
@@ -19,21 +23,21 @@
 
   .shell {
     width: min(480px, 90%);
-    margin-top: 80px; /* lifted up slightly */
+    margin-top: 70px;
     margin-bottom: 40px;
     text-align: center;
   }
 
   .title {
-    font-size: 1.35rem;
+    font-size: 1.45rem;
     margin-bottom: 18px;
     letter-spacing: 0.06em;
     color: #38bdf8;
-    text-shadow: 0 0 12px rgba(56,189,248,0.45);
+    text-shadow: 0 0 14px rgba(56,189,248,0.45);
   }
 
   .search-box {
-    background: rgba(255,255,255,0.06);
+    background: rgba(255,255,255,0.07);
     padding: 18px;
     border-radius: 16px;
     border: 1px solid rgba(148,163,184,0.2);
@@ -78,15 +82,14 @@
 
   .btn:active {
     transform: translateY(1px);
-    box-shadow: 0 6px 18px rgba(34,197,94,0.35);
   }
 
   .result-box {
-    margin-top: 24px; /* slightly tighter */
+    margin-top: 24px;
     background: rgba(255,255,255,0.06);
     padding: 20px;
     border-radius: 16px;
-    border: 1px solid rgba(148,163,184,0.2);
+    border: 1px solid rgba(148,163,184,0.25);
     box-shadow: 0 18px 40px rgba(0,0,0,0.55);
     animation: fadeIn 0.4s ease;
   }
@@ -97,7 +100,7 @@
   }
 
   .headline {
-    font-size: 1.3rem;
+    font-size: 1.35rem;
     margin-bottom: 8px;
     color: #38bdf8;
     font-weight: 600;
@@ -106,21 +109,19 @@
   .sub {
     font-size: 0.9rem;
     color: #cbd5e1;
-    margin-bottom: 10px;
+    margin-bottom: 12px;
   }
 
   .status-tag {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: 6px 10px;
+    padding: 6px 14px;
     border-radius: 999px;
-    background: rgba(56,189,248,0.14);
+    background: rgba(56,189,248,0.18);
     color: #bae6fd;
     font-size: 0.85rem;
     margin-bottom: 10px;
-    max-width: 100%;
-    box-sizing: border-box;
     text-align: center;
   }
 
@@ -133,39 +134,42 @@
 
   .emoji-line {
     font-size: 1.1rem;
-    margin-top: 8px;
+    margin-top: 10px;
   }
 
   .pill-row {
     display: flex;
     flex-wrap: wrap;
-    gap: 6px;
-    margin-top: 10px;
+    gap: 8px;
+    margin-top: 14px;
+    justify-content: center;
   }
 
   .info-pill {
-    flex: 1 1 48%;
+    flex: 1 1 45%;
     min-width: 140px;
-    padding: 6px 8px;
+    padding: 8px 12px;
     border-radius: 999px;
     border: 1px solid rgba(148,163,184,0.35);
     background: rgba(15,23,42,0.75);
     font-size: 0.78rem;
-    color: #e5e7eb;
+    color: #e2e8f0;
     box-sizing: border-box;
+    text-align: left;
   }
 
   .info-pill strong {
     display: block;
     font-size: 0.75rem;
-    color: #9ca3af;
+    color: #94a3b8;
+    margin-bottom: 2px;
   }
 
   .notfound {
     margin-top: 22px;
     padding: 14px;
     border-radius: 12px;
-    background: rgba(220,38,38,0.2);
+    background: rgba(220,38,38,0.25);
     border: 1px solid rgba(248,113,113,0.4);
     color: #fecaca;
     animation: fadeIn 0.4s ease;
@@ -179,6 +183,7 @@
   }
 </style>
 </head>
+
 <body>
 
 <div class="shell">
@@ -187,12 +192,12 @@
   <div class="search-box">
     <div class="field">
       <label>Deal Number</label>
-      <input type="text" id="dealInput" placeholder="e.g. 54321">
+      <input type="text" id="dealInput" placeholder="e.g. 54321" />
     </div>
 
     <div class="field">
       <label>Postcode</label>
-      <input type="text" id="pcInput" placeholder="e.g. 3130">
+      <input type="text" id="pcInput" placeholder="e.g. 3130" />
     </div>
 
     <button class="btn" onclick="lookupDelivery()">Check My Order</button>
@@ -200,112 +205,45 @@
 
   <div id="resultArea"></div>
 </div>
-
 <script>
-/* 🔗 Your Google Apps Script WebApp */
-const WEBAPP_URL =
-  "https://script.google.com/macros/s/AKfycbwjs5uLHVt-Q1gg0-E5HeeVTvD-fkkjKmeCH4GEzQpDPbPefPmaCxrroWWAonTASIBfmw/exec";
+/* ------------------------------------------------------------
+   🔗 Supabase Connection
+-------------------------------------------------------------*/
+const SUPABASE_URL = "https://anaedormisbzriacpztrk.supabase.co";
+const SUPABASE_ANON_KEY =
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFuYWVkb3JtaXNienJpYWNwenRrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQwMTA5MjEsImV4cCI6MjA3OTU4NjkyMX0.T5xIa5fwCrKrBW-blkUKQi9E15_WjGDsZZOYGcNrfUc";
 
-/* Calculate ETA + emoji band using status buffers from backend */
-function calcETA(delivery, statusSteps, buffers) {
-  const status = delivery.status ||
-    statusSteps?.[delivery.statusIndex] ||
-    "In Progress";
+const supa = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-  const base = new Date(delivery.deliveryDate);
-  const bufferDays = buffers?.[status] ?? 0;
 
-  const eta = new Date(base);
-  eta.setDate(eta.getDate() + bufferDays);
+/* ------------------------------------------------------------
+   📌 Load Delivery Settings (Status Steps + Buffers)
+-------------------------------------------------------------*/
+async function loadSettings() {
+  const { data, error } = await supa
+    .from("delivery_settings")
+    .select("*")
+    .eq("id", "default")
+    .single();
 
-  const today = new Date();
-  // normalize (ignore time-of-day)
-  const dayMs = 24 * 60 * 60 * 1000;
-  const diffDays = Math.round((eta - today) / dayMs);
-
-  let emojiLine = "🚗 Your delivery is scheduled.";
-  if (diffDays <= 0) {
-    emojiLine = "🎉 It’s delivery time!";
-  } else if (diffDays <= 3) {
-    emojiLine = "🎉 Almost there – not long to go!";
-  } else if (diffDays <= 14) {
-    emojiLine = "⏳ Your new car is on its way!";
+  if (error) {
+    console.error("Settings load error:", error);
+    return {
+      status_steps: [],
+      status_buffers: {}
+    };
   }
 
-  const etaString = eta.toLocaleDateString("en-AU", {
-    day: "numeric",
-    month: "short",
-    year: "numeric"
-  });
-
-  return { etaString, emojiLine, status };
+  return {
+    status_steps: data.status_steps || [],
+    status_buffers: data.status_buffers || {}
+  };
 }
 
-/* Render the result panel */
-function renderResult(delivery, statusSteps, buffers) {
-  const area = document.getElementById("resultArea");
-  const { etaString, emojiLine, status } = calcETA(delivery, statusSteps, buffers);
 
-  const paymentMethod = delivery.paymentMethod || "Not recorded";
-  const paymentStatus = delivery.paymentStatus || "Pending";
-  const financeStatus = delivery.financeStatus || "Pending";
-
-  const make = delivery.make || "";
-  const model = delivery.model || "";
-  const carLine = (make || model) ? `${make} ${model}`.trim() : "your new vehicle";
-
-  area.innerHTML = `
-    <div class="result-box">
-      <div class="headline">
-        Congratulations ${delivery.customerName || ""}!
-      </div>
-
-      <div class="sub">
-        Your new ${carLine} is getting closer every day.
-      </div>
-
-      <div class="status-tag">
-        Current Status: ${status}
-      </div>
-
-      <div class="sub">Estimated delivery date:</div>
-      <div class="eta">${etaString}${delivery.deliveryTime ? " at " + delivery.deliveryTime : ""}</div>
-
-      <div class="emoji-line">${emojiLine}</div>
-
-      <div class="sub" style="margin-top:16px; margin-bottom:6px;">
-        Finance &amp; Payment
-      </div>
-
-      <div class="pill-row">
-        <div class="info-pill">
-          <strong>Payment Method</strong>
-          ${paymentMethod}
-        </div>
-        <div class="info-pill">
-          <strong>Payment Status</strong>
-          ${paymentStatus}
-        </div>
-        <div class="info-pill">
-          <strong>Finance Status</strong>
-          ${financeStatus}
-        </div>
-      </div>
-
-      <div class="small-note">
-        If your payment status is still <strong>Pending</strong>, please ensure funds are
-        cleared before the delivery day so everything runs smoothly. 🎯
-      </div>
-
-      <div class="sub" style="margin-top:14px;">
-        We can’t wait to hand over your new vehicle.<br>
-        Thank you for choosing us!
-      </div>
-    </div>
-  `;
-}
-
-/* Main lookup using Option B: server-side filter via Apps Script */
+/* ------------------------------------------------------------
+   📌 Lookup Delivery (Deal Number + Postcode)
+-------------------------------------------------------------*/
 async function lookupDelivery() {
   const deal = document.getElementById("dealInput").value.trim();
   const pc = document.getElementById("pcInput").value.trim();
@@ -318,39 +256,140 @@ async function lookupDelivery() {
     return;
   }
 
-  area.innerHTML = `<div class="notfound" style="background:rgba(15,23,42,0.8);border-color:rgba(148,163,184,0.4);color:#e5e7eb;">
+  area.innerHTML = `<div class="notfound" style="background:rgba(15,23,42,0.8);border-color:rgba(148,163,184,0.4);color:#e2e8f0;">
     Checking your order, please wait…
   </div>`;
 
-  try {
-    const url =
-      WEBAPP_URL +
-      `?mode=customer&deal=${encodeURIComponent(deal)}&pc=${encodeURIComponent(pc)}`;
+  /* Load settings (status journey + buffers) */
+  const settings = await loadSettings();
 
-    const res = await fetch(url, { cache: "no-store" });
+  /* Fetch matching delivery */
+  const { data, error } = await supa
+    .from("deliveries")
+    .select("*")
+    .eq("deal_number", deal)
+    .eq("postcode", pc)
+    .limit(1);
 
-    if (!res.ok) {
-      area.innerHTML = `<div class="notfound">We’re having trouble accessing your order right now. Please try again shortly.</div>`;
-      return;
-    }
-
-    const data = await res.json();
-
-    if (!data || !data.delivery) {
-      area.innerHTML = `<div class="notfound">No matching delivery found. Please double-check your Deal Number and Postcode.</div>`;
-      return;
-    }
-
-    const delivery = data.delivery;
-    const statusSteps = data.statusSteps || [];
-    const buffers = data.buffers || {};
-
-    renderResult(delivery, statusSteps, buffers);
-
-  } catch (err) {
-    console.error(err);
-    area.innerHTML = `<div class="notfound">Something went wrong loading your order. Please try again, or contact the dealership.</div>`;
+  if (error) {
+    console.error("Supabase lookup error:", error);
+    area.innerHTML = `<div class="notfound">Error accessing your order. Please try again soon.</div>`;
+    return;
   }
+
+  if (!data || !data.length) {
+    area.innerHTML = `<div class="notfound">No matching delivery found. Double-check your details.</div>`;
+    return;
+  }
+
+  const delivery = data[0];
+  renderDelivery(delivery, settings.status_steps, settings.status_buffers);
+}
+
+
+/* ------------------------------------------------------------
+   📅 Calculate ETA + Emoji Band
+-------------------------------------------------------------*/
+function computeETA(delivery, steps, buffers) {
+  const status =
+    delivery.status ||
+    steps?.[delivery.status_index] ||
+    "In Progress";
+
+  const base = delivery.delivery_date
+    ? new Date(delivery.delivery_date)
+    : new Date();
+
+  const bufferDays = buffers?.[status] ?? 0;
+
+  const eta = new Date(base);
+  eta.setDate(eta.getDate() + bufferDays);
+
+  /* Days until ETA */
+  const dayMs = 24 * 60 * 60 * 1000;
+  const today = new Date();
+  const diffDays = Math.round((eta - today) / dayMs);
+
+  /* Emoji logic */
+  let emoji = "🚗 Your delivery is scheduled.";
+  if (diffDays <= 0) emoji = "🎉 It’s delivery time!";
+  else if (diffDays <= 3) emoji = "🎉 Almost there – not long now!";
+  else if (diffDays <= 14) emoji = "⏳ Your new car is on its way!";
+
+  const etaString = eta.toLocaleDateString("en-AU", {
+    day: "numeric",
+    month: "short",
+    year: "numeric"
+  });
+
+  return { etaString, emoji, status };
+}
+
+
+/* ------------------------------------------------------------
+   🎨 Render Output Panel
+-------------------------------------------------------------*/
+function renderDelivery(delivery, steps, buffers) {
+  const area = document.getElementById("resultArea");
+
+  const paymentMethod = delivery.payment_method || "Not recorded";
+  const paymentStatus = delivery.payment_status || "Pending";
+  const financeStatus = delivery.finance_status || "Pending";
+
+  const make = delivery.make || "";
+  const model = delivery.model || "";
+
+  const { etaString, emoji, status } = computeETA(delivery, steps, buffers);
+
+  area.innerHTML = `
+    <div class="result-box">
+      <div class="headline">
+        Congratulations ${delivery.customer_name || ""}!
+      </div>
+
+      <div class="sub">
+        Your new ${(make + " " + model).trim() || "vehicle"} is getting closer every day.
+      </div>
+
+      <div class="status-tag">Current Status: ${status}</div>
+
+      <div class="sub">Estimated delivery date:</div>
+      <div class="eta">${etaString}${delivery.delivery_time ? " at " + delivery.delivery_time : ""}</div>
+
+      <div class="emoji-line">${emoji}</div>
+
+      <div class="sub" style="margin-top:18px;margin-bottom:6px;">
+        Finance &amp; Payment Details
+      </div>
+
+      <div class="pill-row">
+        <div class="info-pill">
+          <strong>Payment Method</strong>
+          ${paymentMethod}
+        </div>
+
+        <div class="info-pill">
+          <strong>Payment Status</strong>
+          ${paymentStatus}
+        </div>
+
+        <div class="info-pill">
+          <strong>Finance Status</strong>
+          ${financeStatus}
+        </div>
+      </div>
+
+      <div class="small-note">
+        If your payment status is <strong>Pending</strong>, please ensure funds are
+        cleared before delivery day to avoid delays. 🎯
+      </div>
+
+      <div class="sub" style="margin-top:14px;">
+        We can’t wait to hand over your new vehicle.<br>
+        Thank you for choosing us!
+      </div>
+    </div>
+  `;
 }
 </script>
 
