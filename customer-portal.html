@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <title>Your Vehicle Delivery – TRAX Portal</title>
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
 <!-- Supabase Client -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -44,142 +44,58 @@
     box-shadow: 0 18px 40px rgba(0,0,0,0.45);
   }
 
-  .field {
-    margin-bottom: 16px;
-    text-align: left;
-  }
-
-  .field label {
-    font-size: 0.8rem;
-    color: #9ca3af;
-    display: block;
-    margin-bottom: 4px;
-  }
-
+  .field { margin-bottom: 16px; text-align: left; }
+  .field label { font-size: 0.8rem; color: #9ca3af; display: block; margin-bottom: 4px; }
   .field input {
-    width: 100%;
-    padding: 10px 12px;
-    border-radius: 10px;
-    border: 1px solid rgba(148,163,184,0.3);
-    background: rgba(0, 0, 0, 0.45);
-    color: #f8fafc;
-    font-size: 1rem;
-    outline: none;
+    width: 100%; padding: 10px 12px; border-radius: 10px;
+    border: 1px solid rgba(148,163,184,0.3); background: rgba(0, 0, 0, 0.45);
+    color: #f8fafc; font-size: 1rem; outline: none;
   }
 
   .btn {
-    width: 100%;
-    padding: 12px;
-    background: linear-gradient(135deg, #22c55e, #16a34a);
-    border: none;
-    color: #022c22;
-    font-size: 1rem;
-    border-radius: 12px;
-    cursor: pointer;
-    box-shadow: 0 10px 26px rgba(34,197,94,0.45);
+    width: 100%; padding: 12px;
+    background: linear-gradient(135deg, #22c55e, #16a34a); border: none;
+    color: #022c22; font-size: 1rem; border-radius: 12px;
+    cursor: pointer; box-shadow: 0 10px 26px rgba(34,197,94,0.45);
     margin-top: 6px;
   }
 
-  .btn:active {
-    transform: translateY(1px);
-  }
-
   .result-box {
-    margin-top: 24px;
-    background: rgba(255,255,255,0.06);
-    padding: 20px;
-    border-radius: 16px;
+    margin-top: 24px; background: rgba(255,255,255,0.06);
+    padding: 20px; border-radius: 16px;
     border: 1px solid rgba(148,163,184,0.25);
     box-shadow: 0 18px 40px rgba(0,0,0,0.55);
     animation: fadeIn 0.4s ease;
   }
 
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
+  @keyframes fadeIn { from {opacity:0; transform:translateY(10px);} to {opacity:1; transform:translateY(0);} }
 
-  .headline {
-    font-size: 1.35rem;
-    margin-bottom: 8px;
-    color: #38bdf8;
-    font-weight: 600;
-  }
-
-  .sub {
-    font-size: 0.9rem;
-    color: #cbd5e1;
-    margin-bottom: 12px;
-  }
+  .headline { font-size: 1.35rem; margin-bottom: 8px; color: #38bdf8; font-weight: 600; }
+  .sub { font-size: 0.9rem; color: #cbd5e1; margin-bottom: 12px; }
 
   .status-tag {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 6px 14px;
-    border-radius: 999px;
-    background: rgba(56,189,248,0.18);
-    color: #bae6fd;
-    font-size: 0.85rem;
-    margin-bottom: 10px;
-    text-align: center;
+    display:inline-flex; align-items:center; justify-content:center;
+    padding:6px 14px; border-radius:999px;
+    background:rgba(56,189,248,0.18); color:#bae6fd;
+    font-size:0.85rem; margin-bottom:10px;
   }
 
-  .eta {
-    font-size: 1rem;
-    color: #22c55e;
-    margin-top: 4px;
-    font-weight: 500;
-  }
+  .eta { font-size:1rem; color:#22c55e; margin-top:4px; font-weight:500; }
+  .emoji-line { font-size:1.1rem; margin-top:10px; }
 
-  .emoji-line {
-    font-size: 1.1rem;
-    margin-top: 10px;
-  }
-
-  .pill-row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-top: 14px;
-    justify-content: center;
-  }
-
+  .pill-row { display:flex; flex-wrap:wrap; gap:8px; margin-top:14px; justify-content:center; }
   .info-pill {
-    flex: 1 1 45%;
-    min-width: 140px;
-    padding: 8px 12px;
-    border-radius: 999px;
-    border: 1px solid rgba(148,163,184,0.35);
-    background: rgba(15,23,42,0.75);
-    font-size: 0.78rem;
-    color: #e2e8f0;
-    box-sizing: border-box;
-    text-align: left;
+    flex:1 1 45%; min-width:140px; padding:8px 12px;
+    border-radius:999px; border:1px solid rgba(148,163,184,0.35);
+    background:rgba(15,23,42,0.75); font-size:0.78rem;
+    color:#e2e8f0; box-sizing:border-box; text-align:left;
   }
-
-  .info-pill strong {
-    display: block;
-    font-size: 0.75rem;
-    color: #94a3b8;
-    margin-bottom: 2px;
-  }
+  .info-pill strong { display:block; font-size:0.75rem; color:#94a3b8; margin-bottom:2px; }
 
   .notfound {
-    margin-top: 22px;
-    padding: 14px;
-    border-radius: 12px;
-    background: rgba(220,38,38,0.25);
-    border: 1px solid rgba(248,113,113,0.4);
-    color: #fecaca;
-    animation: fadeIn 0.4s ease;
-    font-size: 0.9rem;
-  }
-
-  .small-note {
-    font-size: 0.8rem;
-    color: #94a3b8;
-    margin-top: 12px;
+    margin-top:22px; padding:14px; border-radius:12px;
+    background:rgba(220,38,38,0.25); border:1px solid rgba(248,113,113,0.4);
+    color:#fecaca; animation:fadeIn 0.4s ease; font-size:0.9rem;
   }
 </style>
 </head>
@@ -192,12 +108,12 @@
   <div class="search-box">
     <div class="field">
       <label>Deal Number</label>
-      <input type="text" id="dealInput" placeholder="e.g. 54321" />
+      <input type="text" id="dealInput" placeholder="e.g. BLK8877">
     </div>
 
     <div class="field">
       <label>Postcode</label>
-      <input type="text" id="pcInput" placeholder="e.g. 3130" />
+      <input type="text" id="pcInput" placeholder="e.g. 3082">
     </div>
 
     <button class="btn" onclick="lookupDelivery()">Check My Order</button>
@@ -205,44 +121,39 @@
 
   <div id="resultArea"></div>
 </div>
+
 <script>
 /* ------------------------------------------------------------
-   🔗 Supabase Connection
+   🔗 Supabase connection (confirmed working in admin portal)
 -------------------------------------------------------------*/
-const SUPABASE_URL = "https://anaedormisbzriacpztk.supabase.co";
-const SUPABASE_ANON_KEY =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFuYWVkb3JtaXNienJpYWNwenRrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQwMTI1NzcsImV4cCI6MjA3OTU5ODU3N30._vZmpvBO5h9pYw1q2F6wbmJjz5UUuAoX6wv5AFi7Fq4";
-
-const supa = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
+const supa = supabase.createClient(
+  "https://anaedormisbzriacpztk.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFuYWVkb3JtaXNienJpYWNwenRrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQwMTI1NzcsImV4cCI6MjA3OTU5ODU3N30._vZmpvBO5h9pYw1q2F6wbmJjz5UUuAoX6wv5AFi7Fq4"
+);
 
 /* ------------------------------------------------------------
-   📌 Load Delivery Settings (Status Steps + Buffers)
+   Load delivery settings (status steps + buffers)
 -------------------------------------------------------------*/
 async function loadSettings() {
   const { data, error } = await supa
     .from("delivery_settings")
     .select("*")
     .eq("id", "default")
-    .single();
+    .maybeSingle();
 
   if (error) {
     console.error("Settings load error:", error);
-    return {
-      status_steps: [],
-      status_buffers: {}
-    };
+    return { status_steps: [], status_buffers: {} };
   }
 
   return {
-    status_steps: data.status_steps || [],
-    status_buffers: data.status_buffers || {}
+    status_steps: data?.status_steps || [],
+    status_buffers: data?.status_buffers || {}
   };
 }
 
-
 /* ------------------------------------------------------------
-   📌 Lookup Delivery (Deal Number + Postcode)
+   Lookup customer delivery
 -------------------------------------------------------------*/
 async function lookupDelivery() {
   const deal = document.getElementById("dealInput").value.trim();
@@ -256,20 +167,18 @@ async function lookupDelivery() {
     return;
   }
 
-  area.innerHTML = `<div class="notfound" style="background:rgba(15,23,42,0.8);border-color:rgba(148,163,184,0.4);color:#e2e8f0;">
+  area.innerHTML = `<div class="notfound" style="background:rgba(15,23,42,0.8); border-color:rgba(148,163,184,0.4); color:#e2e8f0;">
     Checking your order, please wait…
   </div>`;
 
-  /* Load settings (status journey + buffers) */
   const settings = await loadSettings();
 
-  /* Fetch matching delivery */
   const { data, error } = await supa
     .from("deliveries")
     .select("*")
     .eq("deal_number", deal)
     .eq("postcode", pc)
-    .limit(1);
+    .maybeSingle();
 
   if (error) {
     console.error("Supabase lookup error:", error);
@@ -277,18 +186,16 @@ async function lookupDelivery() {
     return;
   }
 
-  if (!data || !data.length) {
-    area.innerHTML = `<div class="notfound">No matching delivery found. Double-check your details.</div>`;
+  if (!data) {
+    area.innerHTML = `<div class="notfound">No matching delivery found. Please double-check your details.</div>`;
     return;
   }
 
-  const delivery = data[0];
-  renderDelivery(delivery, settings.status_steps, settings.status_buffers);
+  renderDelivery(data, settings.status_steps, settings.status_buffers);
 }
 
-
 /* ------------------------------------------------------------
-   📅 Calculate ETA + Emoji Band
+   Compute ETA + emoji
 -------------------------------------------------------------*/
 function computeETA(delivery, steps, buffers) {
   const status =
@@ -305,39 +212,32 @@ function computeETA(delivery, steps, buffers) {
   const eta = new Date(base);
   eta.setDate(eta.getDate() + bufferDays);
 
-  /* Days until ETA */
-  const dayMs = 24 * 60 * 60 * 1000;
   const today = new Date();
-  const diffDays = Math.round((eta - today) / dayMs);
+  const diffDays = Math.round((eta - today) / 86400000);
 
-  /* Emoji logic */
   let emoji = "🚗 Your delivery is scheduled.";
   if (diffDays <= 0) emoji = "🎉 It’s delivery time!";
   else if (diffDays <= 3) emoji = "🎉 Almost there – not long now!";
   else if (diffDays <= 14) emoji = "⏳ Your new car is on its way!";
 
-  const etaString = eta.toLocaleDateString("en-AU", {
-    day: "numeric",
-    month: "short",
-    year: "numeric"
-  });
-
-  return { etaString, emoji, status };
+  return {
+    etaString: eta.toLocaleDateString("en-AU", {
+      day: "numeric", month: "short", year: "numeric"
+    }),
+    emoji,
+    status
+  };
 }
 
-
 /* ------------------------------------------------------------
-   🎨 Render Output Panel
+   Render result panel
 -------------------------------------------------------------*/
 function renderDelivery(delivery, steps, buffers) {
   const area = document.getElementById("resultArea");
 
-  const paymentMethod = delivery.payment_method || "Not recorded";
-  const paymentStatus = delivery.payment_status || "Pending";
-  const financeStatus = delivery.finance_status || "Pending";
-
-  const make = delivery.make || "";
-  const model = delivery.model || "";
+  const pm = delivery.payment_method || "Not recorded";
+  const ps = delivery.payment_status || "Pending";
+  const fs = delivery.finance_status || "Pending";
 
   const { etaString, emoji, status } = computeETA(delivery, steps, buffers);
 
@@ -348,7 +248,7 @@ function renderDelivery(delivery, steps, buffers) {
       </div>
 
       <div class="sub">
-        Your new ${(make + " " + model).trim() || "vehicle"} is getting closer every day.
+        Your new ${(delivery.make + " " + delivery.model).trim()} is getting closer every day.
       </div>
 
       <div class="status-tag">Current Status: ${status}</div>
@@ -358,30 +258,12 @@ function renderDelivery(delivery, steps, buffers) {
 
       <div class="emoji-line">${emoji}</div>
 
-      <div class="sub" style="margin-top:18px;margin-bottom:6px;">
-        Finance &amp; Payment Details
-      </div>
+      <div class="sub" style="margin-top:18px;margin-bottom:6px;">Finance & Payment Details</div>
 
       <div class="pill-row">
-        <div class="info-pill">
-          <strong>Payment Method</strong>
-          ${paymentMethod}
-        </div>
-
-        <div class="info-pill">
-          <strong>Payment Status</strong>
-          ${paymentStatus}
-        </div>
-
-        <div class="info-pill">
-          <strong>Finance Status</strong>
-          ${financeStatus}
-        </div>
-      </div>
-
-      <div class="small-note">
-        If your payment status is <strong>Pending</strong>, please ensure funds are
-        cleared before delivery day to avoid delays. 🎯
+        <div class="info-pill"><strong>Payment Method</strong>${pm}</div>
+        <div class="info-pill"><strong>Payment Status</strong>${ps}</div>
+        <div class="info-pill"><strong>Finance Status</strong>${fs}</div>
       </div>
 
       <div class="sub" style="margin-top:14px;">
@@ -395,7 +277,3 @@ function renderDelivery(delivery, steps, buffers) {
 
 </body>
 </html>
-
-
-
-
