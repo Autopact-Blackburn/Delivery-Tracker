@@ -1516,7 +1516,8 @@
       </div>
     </div>
   </div>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
   /******************************************************************
    TRAX CORE STATE – SUPABASE VERSION
@@ -1528,7 +1529,7 @@
 
   // 🔑 Supabase config – PASTE YOUR VALUES HERE
   const SUPABASE_URL = "https://anaedormisbzriacpztk.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFuYWVkb3JtaXNienJpYWNwenRrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQwMTA5MjEsImV4cCI6MjA3OTU4NjkyMX0.T5xIa5fwCrKrBW-blkUKQi9E15_WJgDsZZOYGcNrfUc";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFuYWVkb3JtaXNienJpYWNwenRrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQwMTA5MjEsImV4cCI6MjA3OTU4NjkyMX0.T5xIa5fwCrKrBW-blkUKQi9E15_WJgDsZZOYGcNrfUc";
 
   const supa = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -1710,25 +1711,8 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
       })
     );
 
-    // Push to Supabase (best-effort)
+    // Push to Supabase (best-effort, NO auto-delete)
     try {
-      // 1) Delete rows that no longer exist
-      const { data: existing, error: existingError } =
-        await supa.from("deliveries").select("id");
-
-      if (existingError) throw existingError;
-
-      const existingIds = (existing || []).map((r) => r.id);
-      const currentIds = DELIVERIES.map((d) => d.id);
-      const toDelete = existingIds.filter((id) => !currentIds.includes(id));
-
-      if (toDelete.length > 0) {
-        const { error: deleteError } =
-          await supa.from("deliveries").delete().in("id", toDelete);
-        if (deleteError) throw deleteError;
-      }
-
-      // 2) Upsert current deliveries
       const rows = DELIVERIES.map(mapDeliveryToRow);
       if (rows.length > 0) {
         const { error: upsertError } =
@@ -1736,7 +1720,6 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
         if (upsertError) throw upsertError;
       }
 
-      // 3) Upsert settings row
       const { error: settingsUpsertError } =
         await supa.from("delivery_settings").upsert({
           id: "default",
@@ -1801,8 +1784,13 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 
     return DELIVERIES.filter((d) => {
       if (dept && d.dept !== dept) return false;
+
+      // Dropdown-based status filter
       if (status && d.status !== status) return false;
+
+      // Tile-based status filter
       if (ACTIVE_STATUS_FILTER && d.status !== ACTIVE_STATUS_FILTER) return false;
+
       if (salesperson && d.salesperson !== salesperson) return false;
 
       if (search) {
@@ -1827,6 +1815,7 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
     const sel = document.getElementById("filterSalesperson");
     if (!sel) return;
     const salesSet = new Set(DELIVERIES.map((d) => d.salesperson).filter(Boolean));
+    const current = sel.value;
     sel.innerHTML = '<option value="">All</option>';
     [...salesSet].sort().forEach((sp) => {
       const opt = document.createElement("option");
@@ -1834,11 +1823,15 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
       opt.textContent = sp;
       sel.appendChild(opt);
     });
+    if (current && [...salesSet].includes(current)) {
+      sel.value = current;
+    }
   }
 
   function refreshStatusFilterDropdown() {
     const sel = document.getElementById("filterStatus");
     if (!sel) return;
+    const current = sel.value;
     sel.innerHTML = '<option value="">All</option>';
     STATUS_STEPS.forEach((s) => {
       const opt = document.createElement("option");
@@ -1846,6 +1839,11 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
       opt.textContent = s;
       sel.appendChild(opt);
     });
+    if (current && STATUS_STEPS.includes(current)) {
+      sel.value = current;
+    } else {
+      sel.value = "";
+    }
   }
 
   /******************************************************************
@@ -1868,10 +1866,12 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
         <div class="status-tile-sub">in this stage</div>
       `;
       div.addEventListener("click", () => {
+        // Toggle tile-based filter
         if (ACTIVE_STATUS_FILTER === status) {
           ACTIVE_STATUS_FILTER = "";
         } else {
           ACTIVE_STATUS_FILTER = status;
+          // Clear dropdown-based status filter when using tiles
           const statusSelect = document.getElementById("filterStatus");
           if (statusSelect) statusSelect.value = "";
         }
@@ -1902,6 +1902,7 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
     let nextMonthInTransit = 0;
 
     DELIVERIES.forEach((d) => {
+      if (!d.deliveryDate) return;
       const dDate = new Date(d.deliveryDate);
       if (dDate >= monthStart && dDate <= monthEnd) thisMonth++;
       if (dDate >= nextStart && dDate <= nextEnd) nextMonth++;
@@ -2041,7 +2042,7 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
         dateDiv.innerHTML = `<span>${day.getDate()}</span>`;
         cell.appendChild(dateDiv);
 
-        const dayDels = filtered.filter(d => sameDay(new Date(d.deliveryDate), day));
+        const dayDels = filtered.filter(d => d.deliveryDate && sameDay(new Date(d.deliveryDate), day));
         if (dayDels.length > 0) {
           const badge = document.createElement("div");
           badge.className = "mini-badge";
@@ -2135,6 +2136,7 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
           });
 
           const delList = filtered.filter(d => {
+            if (!d.deliveryDate) return false;
             const delDay = new Date(d.deliveryDate);
             const delTime = new Date(`${d.deliveryDate}T${d.deliveryTime || "10:00"}`);
             return sameDay(delDay, day) && delTime.getHours() === hour;
@@ -2197,6 +2199,7 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
         });
 
         const delList = filtered.filter(d => {
+          if (!d.deliveryDate) return false;
           const delDay = new Date(d.deliveryDate);
           const delTime = new Date(`${d.deliveryDate}T${d.deliveryTime || "10:00"}`);
           return sameDay(delDay, CURRENT_DATE) && delTime.getHours() === hour;
@@ -2711,7 +2714,7 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
     ******************************************************************/
     function buildTemplateText(d) {
       const status = d.status || STATUS_STEPS[d.statusIndex] || "";
-      const baseDate = new Date(d.deliveryDate);
+      const baseDate = d.deliveryDate ? new Date(d.deliveryDate) : new Date();
       const buffer = STATUS_BUFFERS[status] ?? 0;
       const eta = new Date(baseDate);
       eta.setDate(eta.getDate() + buffer);
@@ -2895,26 +2898,47 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
         exportDeliveries(getFilteredDeliveries(), "TRAX_Filtered_Deliveries.csv")
       );
 
-      ["filterDept", "filterStatus", "filterSalesperson"].forEach(id => {
-        document.getElementById(id)?.addEventListener("change", renderAll);
-      });
-      document.getElementById("filterSearch")?.addEventListener("input", renderAll);
+      const deptSelect = document.getElementById("filterDept");
+      if (deptSelect) {
+        deptSelect.addEventListener("change", () => {
+          renderAll();
+        });
+      }
+
+      const statusSelect = document.getElementById("filterStatus");
+      if (statusSelect) {
+        statusSelect.addEventListener("change", () => {
+          // When using dropdown, clear tile-based filter
+          ACTIVE_STATUS_FILTER = "";
+          renderAll();
+        });
+      }
+
+      const salesSelect = document.getElementById("filterSalesperson");
+      if (salesSelect) {
+        salesSelect.addEventListener("change", () => {
+          renderAll();
+        });
+      }
+
+      const searchInput = document.getElementById("filterSearch");
+      if (searchInput) {
+        searchInput.addEventListener("input", () => {
+          renderAll();
+        });
+      }
     }
 
     async function initTRAX() {
-  applyTheme();
+      applyTheme();
       await loadState();
-  renderAll();
-  wireEvents();
-}
+      wireEvents();
+      renderAll();
+    }
 
-document.addEventListener("DOMContentLoaded", () => {
-  initTRAX().catch((err) => console.error("TRAX init failed:", err));
-});
-
+    document.addEventListener("DOMContentLoaded", () => {
+      initTRAX().catch((err) => console.error("TRAX init failed:", err));
+    });
   </script>
 </body>
-
 </html>
-
-
